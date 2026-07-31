@@ -24,7 +24,11 @@ import app.models  # noqa: E402  (registers all model classes on Base.metadata)
 config = context.config
 
 # Inject the sync DB URL from our own settings instead of alembic.ini.
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+db_url = settings.DATABASE_URL
+if db_url and "+asyncpg" in db_url:
+    db_url = db_url.replace("+asyncpg", "")
+
+config.set_main_option("sqlalchemy.url", db_url)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
