@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+venv/
+.venv/
+uploads/avatars/*
+uploads/attachments/*
+uploads/group_images/*
+!uploads/**/.gitkeep
+.git/
+.pytest_cache/
