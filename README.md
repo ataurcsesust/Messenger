@@ -63,13 +63,7 @@ Designed as a portfolio-quality full-stack project with **real-time messaging, g
 * Multi-stage frontend build (Nginx)
 * Environment-based configuration
 
----
 
-# Tech Stack
-
-<Box direction="row" gap={4}><Box><Text weight="semibold">Frontend</Text><List><List.Item>React (Vite)</List.Item><List.Item>TypeScript</List.Item><List.Item>Tailwind CSS</List.Item><List.Item>Context API</List.Item><List.Item>WebRTC</List.Item></List></Box><Box><Text weight="semibold">Backend</Text><List><List.Item>FastAPI</List.Item><List.Item>PostgreSQL</List.Item><List.Item>SQLAlchemy</List.Item><List.Item>Alembic</List.Item><List.Item>JWT Authentication</List.Item><List.Item>WebSocket</List.Item></List></Box></Box>
-
----
 
 # Project Structure
 
