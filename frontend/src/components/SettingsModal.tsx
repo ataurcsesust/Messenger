@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { X } from "lucide-react";
 import { Avatar } from "./Avatar";
+import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 import { chatApi } from "../services/chatApi";
@@ -9,7 +10,7 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
-type Tab = "profile" | "privacy" | "password";
+type Tab = "profile" | "appearance" | "privacy" | "password";
 
 export function SettingsModal({ onClose }: SettingsModalProps) {
   const { user, refreshMe } = useAuth();
@@ -72,22 +73,28 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-      <div className="bg-white dark:bg-base-900 rounded-2xl w-full max-w-lg shadow-2xl border border-base-200 dark:border-base-700 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-base-200 dark:border-base-700">
-          <h2 className="font-semibold text-base-900 dark:text-base-50">Settings</h2>
-          <button onClick={onClose} className="text-base-400 hover:text-base-600">
+    <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center px-4 transition-opacity duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors duration-200">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+          <h2 className="font-semibold text-slate-900 dark:text-slate-100 text-base">Settings</h2>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            aria-label="Close modal"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="flex px-5 pt-3 gap-1 border-b border-base-200 dark:border-base-700">
-          {(["profile", "privacy", "password"] as Tab[]).map((t) => (
+        <div className="flex px-5 pt-3 gap-1 border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
+          {(["profile", "appearance", "privacy", "password"] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => { setTab(t); setMessage(null); }}
-              className={`px-3 py-2 text-sm font-medium capitalize border-b-2 -mb-px ${
-                tab === t ? "border-bubble-sent dark:border-bubble-sent-dark text-bubble-sent dark:text-bubble-sent-dark" : "border-transparent text-base-500 dark:text-base-400"
+              className={`px-3.5 py-2.5 text-xs font-semibold capitalize border-b-2 transition-all -mb-px shrink-0 ${
+                tab === t
+                  ? "border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400"
+                  : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
               {t}
@@ -96,7 +103,11 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
         </div>
 
         <div className="p-5 space-y-4">
-          {message && <p className="text-sm text-emerald-600 dark:text-emerald-400">{message}</p>}
+          {message && (
+            <div className="text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 rounded-xl px-3.5 py-2">
+              {message}
+            </div>
+          )}
 
           {tab === "profile" && (
             <>
@@ -111,45 +122,65 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                 />
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="text-sm text-bubble-sent dark:text-bubble-sent-dark font-medium hover:underline"
+                  className="text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline"
                 >
                   Change photo
                 </button>
               </div>
               <div>
-                <label className="block text-sm font-medium text-base-700 dark:text-base-300 mb-1">Full name</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Full name</label>
                 <input
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full rounded-xl border border-base-300 dark:border-base-700 bg-white dark:bg-base-800 px-3 py-2 text-base-900 dark:text-base-50 focus:outline-none focus:ring-2 focus:ring-bubble-sent"
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-base-700 dark:text-base-300 mb-1">Bio</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Bio</label>
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   rows={2}
-                  className="w-full rounded-xl border border-base-300 dark:border-base-700 bg-white dark:bg-base-800 px-3 py-2 text-base-900 dark:text-base-50 focus:outline-none focus:ring-2 focus:ring-bubble-sent"
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800"
                 />
               </div>
-              <button onClick={saveProfile} disabled={saving} className="rounded-xl bg-bubble-sent dark:bg-bubble-sent-dark text-white font-medium px-4 py-2 disabled:opacity-60">
+              <button
+                onClick={saveProfile}
+                disabled={saving}
+                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 shadow-xs disabled:opacity-60 transition"
+              >
                 Save profile
               </button>
             </>
           )}
 
+          {tab === "appearance" && (
+            <div className="space-y-3 py-1">
+              <div>
+                <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-1">Theme preference</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                  Choose your interface theme. System option dynamically adapts to your OS settings.
+                </p>
+                <ThemeToggle variant="segmented" />
+              </div>
+            </div>
+          )}
+
           {tab === "privacy" && (
             <>
-              <label className="flex items-center justify-between">
-                <span className="text-sm text-base-700 dark:text-base-300">Show my last seen</span>
-                <input type="checkbox" checked={showLastSeen} onChange={(e) => setShowLastSeen(e.target.checked)} className="h-4 w-4 accent-bubble-sent" />
+              <label className="flex items-center justify-between py-1 cursor-pointer">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Show my last seen</span>
+                <input type="checkbox" checked={showLastSeen} onChange={(e) => setShowLastSeen(e.target.checked)} className="h-4 w-4 accent-blue-600 rounded" />
               </label>
-              <label className="flex items-center justify-between">
-                <span className="text-sm text-base-700 dark:text-base-300">Show read receipts</span>
-                <input type="checkbox" checked={showReadReceipts} onChange={(e) => setShowReadReceipts(e.target.checked)} className="h-4 w-4 accent-bubble-sent" />
+              <label className="flex items-center justify-between py-1 cursor-pointer">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Show read receipts</span>
+                <input type="checkbox" checked={showReadReceipts} onChange={(e) => setShowReadReceipts(e.target.checked)} className="h-4 w-4 accent-blue-600 rounded" />
               </label>
-              <button onClick={savePrivacy} disabled={saving} className="rounded-xl bg-bubble-sent dark:bg-bubble-sent-dark text-white font-medium px-4 py-2 disabled:opacity-60">
+              <button
+                onClick={savePrivacy}
+                disabled={saving}
+                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 shadow-xs disabled:opacity-60 transition mt-2"
+              >
                 Save privacy settings
               </button>
             </>
@@ -158,24 +189,28 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
           {tab === "password" && (
             <>
               <div>
-                <label className="block text-sm font-medium text-base-700 dark:text-base-300 mb-1">Current password</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Current password</label>
                 <input
                   type="password"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full rounded-xl border border-base-300 dark:border-base-700 bg-white dark:bg-base-800 px-3 py-2 text-base-900 dark:text-base-50 focus:outline-none focus:ring-2 focus:ring-bubble-sent"
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-base-700 dark:text-base-300 mb-1">New password</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">New password</label>
                 <input
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full rounded-xl border border-base-300 dark:border-base-700 bg-white dark:bg-base-800 px-3 py-2 text-base-900 dark:text-base-50 focus:outline-none focus:ring-2 focus:ring-bubble-sent"
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800"
                 />
               </div>
-              <button onClick={changePassword} disabled={saving} className="rounded-xl bg-bubble-sent dark:bg-bubble-sent-dark text-white font-medium px-4 py-2 disabled:opacity-60">
+              <button
+                onClick={changePassword}
+                disabled={saving}
+                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 shadow-xs disabled:opacity-60 transition"
+              >
                 Change password
               </button>
             </>
@@ -185,3 +220,4 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     </div>
   );
 }
+

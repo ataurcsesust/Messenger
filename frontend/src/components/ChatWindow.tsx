@@ -85,14 +85,14 @@ export function ChatWindow({
     : "Offline";
 
   return (
-    <div className="flex-1 flex flex-col h-full min-w-0">
-      <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b border-base-200/60 dark:border-base-700/60 bg-white/70 dark:bg-base-900/70 backdrop-blur-xl">
+    <div className="flex-1 flex flex-col h-full min-w-0 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+      <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl">
         <div className="flex items-center gap-3 min-w-0">
           <Avatar name={name} src={avatarSrc} isOnline={isOnline} />
           <div className="min-w-0">
-            <p className="font-medium text-base-900 dark:text-base-50 truncate">{name}</p>
-            <p className="text-xs text-base-500 dark:text-base-400 truncate">
-              {typingUserName ? <span className="text-bubble-sent dark:text-bubble-sent-dark">{typingUserName} is typing…</span> : subtitle}
+            <p className="font-semibold text-slate-900 dark:text-slate-100 truncate text-sm">{name}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+              {typingUserName ? <span className="text-blue-600 dark:text-blue-400 font-medium animate-pulse">{typingUserName} is typing…</span> : subtitle}
             </p>
           </div>
         </div>
@@ -101,31 +101,35 @@ export function ChatWindow({
             <button
               onClick={onStartCall}
               disabled={!isOnline}
-              className="p-2 rounded-full hover:bg-base-200 dark:hover:bg-base-800 text-base-500 dark:text-base-400 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               title={isOnline ? "Start a voice call" : "User is offline"}
+              aria-label="Start voice call"
             >
               <Phone className="h-5 w-5" />
             </button>
           )}
           <button
             onClick={conversation.is_group ? onOpenGroupSettings : undefined}
-            className={`p-2 rounded-full hover:bg-base-200 dark:hover:bg-base-800 text-base-500 ${!conversation.is_group ? "opacity-40 cursor-default" : ""}`}
+            className={`p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors ${!conversation.is_group ? "opacity-40 cursor-default" : ""}`}
             title={conversation.is_group ? "Group settings" : undefined}
+            aria-label="More actions"
           >
             <MoreVertical className="h-5 w-5" />
           </button>
         </div>
       </header>
 
-      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-3 py-4">
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
         {loadingMessages && (
-          <p className="text-center text-xs text-base-400 py-2">Loading earlier messages…</p>
+          <p className="text-center text-xs text-slate-400 dark:text-slate-500 py-2 font-medium">Loading earlier messages…</p>
         )}
 
         {messages.length === 0 && !loadingMessages ? (
-          <div className="h-full flex flex-col items-center justify-center text-base-400 dark:text-base-500">
-            <MessageCircleOff className="h-10 w-10 mb-2 opacity-50" />
-            <p className="text-sm">No messages yet. Say hello!</p>
+          <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+            <div className="h-16 w-16 rounded-full bg-slate-200/60 dark:bg-slate-800/60 flex items-center justify-center mb-3">
+              <MessageCircleOff className="h-8 w-8 opacity-60 text-slate-500 dark:text-slate-400" />
+            </div>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">No messages yet. Say hello!</p>
           </div>
         ) : (
           messages.map((msg, i) => {
@@ -134,8 +138,8 @@ export function ChatWindow({
             return (
               <div key={msg.id}>
                 {showDateSeparator && (
-                  <div className="flex items-center justify-center my-3">
-                    <span className="text-[11px] font-medium text-base-400 dark:text-base-500 bg-base-100/80 dark:bg-base-800/80 rounded-full px-3 py-1">
+                  <div className="flex items-center justify-center my-4">
+                    <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/70 dark:bg-slate-800/80 rounded-full px-3 py-1 border border-slate-300/40 dark:border-slate-700/40 shadow-2xs">
                       {formatDateSeparator(msg.created_at)}
                     </span>
                   </div>
@@ -180,3 +184,4 @@ export function ChatWindow({
     </div>
   );
 }
+

@@ -1,0 +1,8 @@
+cd ~/MyFolder/Project/messenger-clone-fullstack-production/messenger-clone-project
+docker compose up -d
+
+
+
+
+cd ~/MyFolder/Project/messenger-clone-fullstack-production/messenger-clone-project/frontend
+npm run dev

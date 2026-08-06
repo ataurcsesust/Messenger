@@ -43,33 +43,35 @@ export function MessageBubble({
     if (isSending) return <span title="Sending..."><Clock className="h-3 w-3 animate-pulse opacity-80" /></span>;
     if (isFailed) return <span title="Failed to send"><AlertCircle className="h-3.5 w-3.5 text-red-400" /></span>;
     if (message.status === "delivered" || isRead) {
-      return <CheckCheck className={`h-3 w-3 ${isRead ? "text-sky-300" : "opacity-80"}`} />;
+      return <CheckCheck className={`h-3 w-3 ${isRead ? "text-sky-300 dark:text-sky-300" : "opacity-80"}`} />;
     }
     return <Check className="h-3 w-3 opacity-80" />;
   };
 
   return (
-    <div className={`group flex message-enter ${isOwn ? "justify-end" : "justify-start"} mb-1.5 px-1`}>
-      <div className={`flex items-end gap-1.5 max-w-[70%] ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+    <div className={`group flex message-enter ${isOwn ? "justify-end" : "justify-start"} mb-2 px-1`}>
+      <div className={`flex items-end gap-1.5 max-w-[75%] ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
         <div className="relative">
           {message.is_pinned && (
-            <Pin className="h-3 w-3 text-accent-500 absolute -top-4 right-0 rotate-45" />
+            <Pin className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400 absolute -top-4 right-0 rotate-45" />
           )}
           <div
-            className={`rounded-2xl px-3.5 py-2 text-[15px] leading-relaxed ${
+            className={`rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed transition-colors duration-200 ${
               isDeleted
-                ? "italic text-base-400 dark:text-base-500 bg-base-100/60 dark:bg-base-800/40"
+                ? "italic text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60"
                 : isFailed
-                ? "bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-800 text-base-900 dark:text-base-50 rounded-br-md"
+                ? "bg-red-50 dark:bg-red-950/50 border border-red-300 dark:border-red-800 text-slate-900 dark:text-slate-100 rounded-br-xs"
                 : isOwn
-                ? "bg-bubble-sent dark:bg-bubble-sent-dark text-white rounded-br-md"
-                : "bg-white/80 dark:bg-base-800/80 backdrop-blur text-base-900 dark:text-base-50 border border-base-200/60 dark:border-base-700/60 rounded-bl-md"
+                ? "bg-blue-600 dark:bg-blue-600 text-white rounded-br-xs shadow-xs"
+                : "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-transparent dark:border-slate-700/60 rounded-bl-xs shadow-xs"
             }`}
           >
             {message.reply_to_id && !isDeleted && (
               <div
-                className={`text-xs mb-1 pl-2 border-l-2 opacity-80 ${
-                  isOwn && !isFailed ? "border-white/50" : "border-base-400"
+                className={`text-xs mb-1.5 pl-2.5 border-l-2 py-0.5 rounded-r ${
+                  isOwn && !isFailed
+                    ? "border-white/60 bg-white/10 text-white/90"
+                    : "border-blue-500 dark:border-blue-400 bg-slate-300/40 dark:bg-slate-700/40 text-slate-700 dark:text-slate-300"
                 }`}
               >
                 Replying to a message
@@ -81,18 +83,20 @@ export function MessageBubble({
             ) : (
               <>
                 {message.attachments.map((att) => (
-                  <div key={att.id} className="mb-1">
+                  <div key={att.id} className="mb-1.5">
                     {att.mime_type.startsWith("image/") ? (
-                      <img src={att.file_url} alt={att.file_name} className="rounded-lg max-w-full max-h-64 object-cover" />
+                      <img src={att.file_url} alt={att.file_name} className="rounded-xl max-w-full max-h-64 object-cover border border-black/10 dark:border-white/10" />
                     ) : att.mime_type.startsWith("video/") ? (
-                      <video src={att.file_url} controls className="rounded-lg max-w-full max-h-64" />
+                      <video src={att.file_url} controls className="rounded-xl max-w-full max-h-64" />
                     ) : att.mime_type.startsWith("audio/") ? (
                       <audio src={att.file_url} controls className="max-w-full" />
                     ) : (
                       <a
                         href={att.file_url}
                         download={att.file_name}
-                        className={`flex items-center gap-2 underline text-sm ${isOwn && !isFailed ? "text-white" : "text-bubble-sent dark:text-bubble-sent-dark"}`}
+                        className={`flex items-center gap-2 underline text-sm font-medium ${
+                          isOwn && !isFailed ? "text-white" : "text-blue-600 dark:text-blue-400"
+                        }`}
                       >
                         📎 {att.file_name}
                       </a>
@@ -104,12 +108,12 @@ export function MessageBubble({
             )}
 
             <div
-              className={`flex items-center gap-1 mt-0.5 text-[10px] ${
+              className={`flex items-center gap-1 mt-1 text-[10px] ${
                 isFailed
-                  ? "text-red-500 justify-end"
+                  ? "text-red-500 dark:text-red-400 justify-end"
                   : isOwn
-                  ? "text-white/70 justify-end"
-                  : "text-base-400 dark:text-base-500"
+                  ? "text-white/80 justify-end"
+                  : "text-slate-500 dark:text-slate-400"
               }`}
             >
               {message.is_edited && !isDeleted && <span>edited</span>}
@@ -119,11 +123,11 @@ export function MessageBubble({
           </div>
 
           {isFailed && onRetry && (
-            <div className="flex items-center justify-end gap-1.5 mt-1 text-xs text-red-500 font-medium">
+            <div className="flex items-center justify-end gap-1.5 mt-1 text-xs text-red-600 dark:text-red-400 font-medium">
               <span>Failed to send</span>
               <button
                 onClick={() => onRetry(message)}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-900/60 text-red-700 dark:text-red-300 text-[11px] font-semibold transition"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-100 dark:bg-red-900/50 hover:bg-red-200 dark:hover:bg-red-900 text-red-700 dark:text-red-300 text-[11px] font-semibold transition"
               >
                 <RotateCw className="h-3 w-3" /> Retry
               </button>
@@ -131,58 +135,61 @@ export function MessageBubble({
           )}
 
           {message.reactions.length > 0 && (
-            <div className={`flex gap-0.5 mt-0.5 ${isOwn ? "justify-end" : "justify-start"}`}>
-              <div className="bg-white dark:bg-base-800 border border-base-200 dark:border-base-700 rounded-full px-1.5 py-0.5 text-xs shadow-sm">
-                {[...new Set(message.reactions.map((r) => r.emoji))].join(" ")} {message.reactions.length}
+            <div className={`flex gap-0.5 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
+              <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-full px-2 py-0.5 text-xs shadow-xs flex items-center gap-1 font-medium">
+                {[...new Set(message.reactions.map((r) => r.emoji))].join(" ")} <span>{message.reactions.length}</span>
               </div>
             </div>
           )}
         </div>
 
         {!isDeleted && (
-          <div className="relative opacity-0 group-hover:opacity-100 transition flex items-center gap-0.5">
+          <div className="relative opacity-0 group-hover:opacity-100 transition duration-200 flex items-center gap-0.5">
             <button
               onClick={() => setShowEmoji((v) => !v)}
-              className="p-1.5 rounded-full hover:bg-base-200 dark:hover:bg-base-700 text-base-500"
+              className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition"
               title="React"
+              aria-label="React"
             >
-              <Smile className="h-3.5 w-3.5" />
+              <Smile className="h-4 w-4" />
             </button>
             {showEmoji && (
               <EmojiPicker onSelect={(emoji) => onReact(message.id, emoji)} onClose={() => setShowEmoji(false)} />
             )}
             <button
               onClick={() => onReply(message)}
-              className="p-1.5 rounded-full hover:bg-base-200 dark:hover:bg-base-700 text-base-500"
+              className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition"
               title="Reply"
+              aria-label="Reply"
             >
-              <Reply className="h-3.5 w-3.5" />
+              <Reply className="h-4 w-4" />
             </button>
             <div className="relative">
               <button
                 onClick={() => setShowMenu((v) => !v)}
-                className="p-1.5 rounded-full hover:bg-base-200 dark:hover:bg-base-700 text-base-500"
-                title="More"
+                className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition"
+                title="More options"
+                aria-label="More options"
               >
-                <MoreHorizontal className="h-3.5 w-3.5" />
+                <MoreHorizontal className="h-4 w-4" />
               </button>
               {showMenu && (
                 <div
-                  className="absolute z-20 top-full mt-1 right-0 bg-white dark:bg-base-800 border border-base-200 dark:border-base-700 rounded-xl shadow-lg py-1 w-44 text-sm"
+                  className="absolute z-30 top-full mt-1 right-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 w-48 text-sm transition-colors duration-200"
                   onMouseLeave={() => setShowMenu(false)}
                 >
-                  <MenuItem icon={<Copy className="h-3.5 w-3.5" />} label="Copy" onClick={() => {
+                  <MenuItem icon={<Copy className="h-4 w-4" />} label="Copy text" onClick={() => {
                     if (message.content) navigator.clipboard.writeText(message.content);
                     setShowMenu(false);
                   }} />
-                  <MenuItem icon={<Forward className="h-3.5 w-3.5" />} label="Forward" onClick={() => { onForward(message); setShowMenu(false); }} />
-                  <MenuItem icon={<Pin className="h-3.5 w-3.5" />} label={message.is_pinned ? "Unpin" : "Pin"} onClick={() => { onPin(message.id, !message.is_pinned); setShowMenu(false); }} />
+                  <MenuItem icon={<Forward className="h-4 w-4" />} label="Forward" onClick={() => { onForward(message); setShowMenu(false); }} />
+                  <MenuItem icon={<Pin className="h-4 w-4" />} label={message.is_pinned ? "Unpin" : "Pin"} onClick={() => { onPin(message.id, !message.is_pinned); setShowMenu(false); }} />
                   {isOwn && (
-                    <MenuItem icon={<Pencil className="h-3.5 w-3.5" />} label="Edit" onClick={() => { onEdit(message); setShowMenu(false); }} />
+                    <MenuItem icon={<Pencil className="h-4 w-4" />} label="Edit" onClick={() => { onEdit(message); setShowMenu(false); }} />
                   )}
-                  <MenuItem icon={<Trash2 className="h-3.5 w-3.5" />} label="Delete for me" onClick={() => { onDeleteForMe(message.id); setShowMenu(false); }} />
+                  <MenuItem icon={<Trash2 className="h-4 w-4" />} label="Delete for me" onClick={() => { onDeleteForMe(message.id); setShowMenu(false); }} />
                   {isOwn && (
-                    <MenuItem icon={<Trash2 className="h-3.5 w-3.5" />} label="Delete for everyone" danger onClick={() => { onDeleteForEveryone(message.id); setShowMenu(false); }} />
+                    <MenuItem icon={<Trash2 className="h-4 w-4" />} label="Delete for everyone" danger onClick={() => { onDeleteForEveryone(message.id); setShowMenu(false); }} />
                   )}
                 </div>
               )}
@@ -198,11 +205,13 @@ function MenuItem({ icon, label, onClick, danger }: { icon: React.ReactNode; lab
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-2 px-3 py-1.5 hover:bg-base-100 dark:hover:bg-base-700 text-left ${
-        danger ? "text-red-600 dark:text-red-400" : "text-base-700 dark:text-base-200"
+      className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-700/80 text-left transition ${
+        danger ? "text-red-600 dark:text-red-400" : "text-slate-700 dark:text-slate-200"
       }`}
     >
-      {icon} {label}
+      <span className="shrink-0 text-slate-500 dark:text-slate-400">{icon}</span>
+      <span>{label}</span>
     </button>
   );
 }
+

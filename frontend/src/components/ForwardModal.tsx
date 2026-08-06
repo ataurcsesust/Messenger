@@ -36,16 +36,20 @@ export function ForwardModal({ message, conversations, onClose, onForwarded }: F
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-      <div className="bg-white dark:bg-base-900 rounded-2xl w-full max-w-sm shadow-2xl border border-base-200 dark:border-base-700 overflow-hidden max-h-[80vh] flex flex-col">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-base-200 dark:border-base-700 shrink-0">
-          <h2 className="font-semibold text-base-900 dark:text-base-50">Forward message</h2>
-          <button onClick={onClose} className="text-base-400 hover:text-base-600">
+    <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center px-4 transition-opacity duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden max-h-[80vh] flex flex-col transition-colors duration-200">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
+          <h2 className="font-semibold text-slate-900 dark:text-slate-100 text-base">Forward message</h2>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            aria-label="Close modal"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="px-5 py-2 text-sm text-base-500 dark:text-base-400 italic truncate border-b border-base-100 dark:border-base-800 shrink-0">
+        <div className="px-5 py-2 text-xs text-slate-500 dark:text-slate-400 italic truncate border-b border-slate-100 dark:border-slate-800 shrink-0 bg-slate-50 dark:bg-slate-800/40">
           "{message.content ?? "attachment"}"
         </div>
 
@@ -58,23 +62,23 @@ export function ForwardModal({ message, conversations, onClose, onForwarded }: F
               <button
                 key={conv.id}
                 onClick={() => toggle(conv.id)}
-                className={`w-full flex items-center gap-3 p-2 rounded-xl text-left transition ${
-                  checked ? "bg-bubble-sent/10 dark:bg-bubble-sent-dark/15" : "hover:bg-base-100 dark:hover:bg-base-800"
+                className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition duration-200 ${
+                  checked ? "bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100" : "hover:bg-slate-100 dark:hover:bg-slate-800"
                 }`}
               >
                 <Avatar name={name} src={avatarSrc} size="sm" showStatus={false} />
-                <span className="text-sm text-base-900 dark:text-base-50 truncate flex-1">{name}</span>
-                <input type="checkbox" checked={checked} readOnly className="h-4 w-4 accent-bubble-sent" />
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate flex-1">{name}</span>
+                <input type="checkbox" checked={checked} readOnly className="h-4 w-4 accent-blue-600 rounded" />
               </button>
             );
           })}
         </div>
 
-        <div className="p-4 border-t border-base-200 dark:border-base-700 shrink-0">
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800 shrink-0">
           <button
             onClick={handleForward}
             disabled={selected.size === 0 || sending}
-            className="w-full rounded-xl bg-bubble-sent dark:bg-bubble-sent-dark text-white font-medium py-2.5 flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 transition"
           >
             <Forward className="h-4 w-4" />
             Forward to {selected.size || ""} {selected.size === 1 ? "chat" : selected.size > 1 ? "chats" : ""}
@@ -84,3 +88,4 @@ export function ForwardModal({ message, conversations, onClose, onForwarded }: F
     </div>
   );
 }
+

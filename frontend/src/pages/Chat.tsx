@@ -516,7 +516,7 @@ export default function Chat() {
   const activeMessages = activeId ? messagesByConv[activeId] ?? [] : [];
 
   return (
-    <div className="h-screen flex flex-col bg-base-50 dark:bg-base-950 overflow-hidden">
+    <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-950 overflow-hidden transition-colors duration-200">
       {/* Top Banner for Cold Start / Offline handling */}
       {isServerWaking && (
         <div className="bg-amber-500 text-white px-4 py-2 text-xs font-semibold flex items-center justify-center gap-2 shadow-md z-30 animate-pulse shrink-0">
@@ -578,8 +578,8 @@ export default function Chat() {
             onRetryMessage={handleRetryMessage}
           />
         ) : (
-          <div className="flex-1 hidden sm:flex items-center justify-center text-base-400 dark:text-base-500">
-            <p>Select a conversation to start chatting.</p>
+          <div className="flex-1 hidden sm:flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+            <p className="text-sm font-medium">Select a conversation to start chatting.</p>
           </div>
         )}
       </div>
@@ -638,3 +638,4 @@ export default function Chat() {
     </div>
   );
 }
+

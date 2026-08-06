@@ -1,40 +1,92 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /*
-  Design direction: "quiet signal" — a calm slate-blue base so message
-  content stays the visual focus, with a single warm amber accent
-  reserved for unread badges / active states. Sent bubbles use a deep
-  indigo; received bubbles use frosted glass over the base. Dark mode
-  deepens the same hues rather than switching palette.
+  Messenger Theme Tokens & Global Styles
 */
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  --color-base-50: #f6f7fb;
-  --color-base-100: #eceef5;
-  --color-base-200: #dde1ec;
-  --color-base-300: #c2c8db;
-  --color-base-400: #9aa3c0;
-  --color-base-500: #717ba0;
-  --color-base-600: #545e82;
-  --color-base-700: #3f4766;
-  --color-base-800: #262b42;
-  --color-base-900: #14172a;
-  --color-base-950: #0b0d18;
+  --color-base-50: #f8fafc;
+  --color-base-100: #f1f5f9;
+  --color-base-200: #e2e8f0;
+  --color-base-300: #cbd5e1;
+  --color-base-400: #94a3b8;
+  --color-base-500: #64748b;
+  --color-base-600: #475569;
+  --color-base-700: #334155;
+  --color-base-800: #1e293b;
+  --color-base-900: #0f172a;
+  --color-base-950: #090d16;
 
-  --color-accent-400: #f2b45c;
-  --color-accent-500: #eb9c3a;
-  --color-accent-600: #d1802a;
+  --color-accent-400: #38bdf8;
+  --color-accent-500: #0284c7;
+  --color-accent-600: #0369a1;
 
-  --color-bubble-sent: #4b4fd6;
-  --color-bubble-sent-dark: #6366f1;
+  --color-bubble-sent: #0084ff;
+  --color-bubble-sent-dark: #2563eb;
 }
 
-html { color-scheme: light dark; }
-body { font-family: var(--font-sans); }
+:root {
+  --theme-bg-primary: #ffffff;
+  --theme-bg-secondary: #f3f4f6;
+  --theme-bg-tertiary: #e5e7eb;
+  --theme-bg-sidebar: #ffffff;
+  --theme-bg-chat: #f8fafc;
+  --theme-text-primary: #0f172a;
+  --theme-text-secondary: #475569;
+  --theme-text-muted: #94a3b8;
+  --theme-border-light: #e2e8f0;
+  --theme-border-dark: #cbd5e1;
+  --theme-bubble-incoming: #e5e7eb;
+  --theme-bubble-incoming-text: #0f172a;
+  --theme-bubble-outgoing: #0084ff;
+  --theme-bubble-outgoing-text: #ffffff;
+}
 
-* { scrollbar-width: thin; scrollbar-color: var(--color-base-300) transparent; }
-.dark * { scrollbar-color: var(--color-base-700) transparent; }
+.dark {
+  --theme-bg-primary: #0f172a;
+  --theme-bg-secondary: #1e293b;
+  --theme-bg-tertiary: #334155;
+  --theme-bg-sidebar: #0f172a;
+  --theme-bg-chat: #090d16;
+  --theme-text-primary: #f8fafc;
+  --theme-text-secondary: #cbd5e1;
+  --theme-text-muted: #64748b;
+  --theme-border-light: #1e293b;
+  --theme-border-dark: #334155;
+  --theme-bubble-incoming: #1e293b;
+  --theme-bubble-incoming-text: #f8fafc;
+  --theme-bubble-outgoing: #2563eb;
+  --theme-bubble-outgoing-text: #ffffff;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--theme-bg-primary);
+  color: var(--theme-text-primary);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Smooth transition for theme switches */
+div, aside, header, nav, main, section, footer, button, input, textarea, select {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 250ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-base-300) transparent;
+}
+.dark * {
+  scrollbar-color: var(--color-base-700) transparent;
+}
 
 @keyframes typing-bounce {
   0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
@@ -51,5 +103,9 @@ body { font-family: var(--font-sans); }
 .message-enter { animation: message-in 0.18s ease-out; }
 
 @media (prefers-reduced-motion: reduce) {
-  .typing-dot, .message-enter { animation: none !important; }
+  .typing-dot, .message-enter, div, aside, header, nav, main, section, footer, button, input, textarea, select {
+    animation: none !important;
+    transition: none !important;
+  }
 }
+
