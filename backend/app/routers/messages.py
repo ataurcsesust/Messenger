@@ -39,6 +39,7 @@ async def send_message(
         message_type=payload.message_type,
         reply_to_id=payload.reply_to_id,
         attachment_ids=payload.attachment_ids,
+        client_message_id=payload.client_message_id,
     )
     return message
 
@@ -48,6 +49,7 @@ async def send_message_with_attachment(
     conversation_id: UUID,
     file: UploadFile = File(...),
     content: Optional[str] = None,
+    client_message_id: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -78,6 +80,7 @@ async def send_message_with_attachment(
         message_type=allowed_map[file.content_type],
         reply_to_id=None,
         attachment_ids=[],
+        client_message_id=client_message_id,
     )
     attachment = Attachment(
         message_id=message.id,

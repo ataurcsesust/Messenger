@@ -50,6 +50,33 @@ async def initiate_call(db: AsyncSession, caller: User, callee_id: UUID) -> Call
     if await _is_blocked(db, caller.id, callee_id):
         raise ForbiddenError("You can't call this user")
 
+    # Idempotent retry check: if caller already initiated a ringing call to this callee, return it.
+    existing_call_res = await db.execute(
+        select(Call).where(
+            Call.caller_id == caller.id,
+            Call.callee_id == callee_id,
+            Call.status == CallStatus.RINGING,
+        )
+    )
+    existing_call = existing_call_res.scalar_one_or_none()
+    if existing_call is not None:
+        conversation = await conversation_service.get_or_create_direct_conversation(db, caller, callee_id)
+        await manager.send_to_user(
+            callee_id,
+            {
+                "type": "incoming_call",
+                "call_id": str(existing_call.id),
+                "conversation_id": str(conversation.id),
+                "caller": {
+                    "id": str(caller.id),
+                    "username": caller.username,
+                    "full_name": caller.full_name,
+                    "avatar_url": caller.avatar_url,
+                },
+            },
+        )
+        return existing_call
+
     if not manager.is_online(callee_id):
         raise ConflictError("This user is currently offline and can't be called")
 

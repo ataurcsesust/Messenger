@@ -20,7 +20,35 @@ export const tokenStorage = {
   },
 };
 
-export const api = axios.create({ baseURL: API_V1 });
+export const api = axios.create({ baseURL: API_V1, timeout: 25000 });
+
+export function isNetworkError(error: unknown): boolean {
+  if (axios.isAxiosError(error)) {
+    return !error.response && (error.code === "ERR_NETWORK" || !navigator.onLine);
+  }
+  return !navigator.onLine;
+}
+
+export function isTimeoutError(error: unknown): boolean {
+  if (axios.isAxiosError(error)) {
+    return error.code === "ECONNABORTED" || Boolean(error.message && error.message.includes("timeout"));
+  }
+  return false;
+}
+
+export function isServerUnavailable(error: unknown): boolean {
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status;
+    return (
+      status === 502 ||
+      status === 503 ||
+      status === 504 ||
+      isTimeoutError(error) ||
+      (isNetworkError(error) && navigator.onLine)
+    );
+  }
+  return false;
+}
 
 api.interceptors.request.use((config) => {
   const token = tokenStorage.getAccess();

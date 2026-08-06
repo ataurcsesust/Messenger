@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, CheckCheck, MoreHorizontal, Pin, Reply, Smile, Copy, Pencil, Trash2, Forward } from "lucide-react";
+import { Check, CheckCheck, Clock, AlertCircle, RotateCw, MoreHorizontal, Pin, Reply, Smile, Copy, Pencil, Trash2, Forward } from "lucide-react";
 import type { MessageOut } from "../types";
 import { formatMessageTime } from "../utils/date";
 import { EmojiPicker } from "./EmojiPicker";
@@ -15,6 +15,7 @@ interface MessageBubbleProps {
   onReact: (id: string, emoji: string) => void;
   onPin: (id: string, pinned: boolean) => void;
   onForward: (message: MessageOut) => void;
+  onRetry?: (message: MessageOut) => void;
 }
 
 export function MessageBubble({
@@ -28,11 +29,24 @@ export function MessageBubble({
   onReact,
   onPin,
   onForward,
+  onRetry,
 }: MessageBubbleProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
 
   const isDeleted = message.is_deleted_for_everyone;
+  const isFailed = message.status === "failed";
+  const isSending = message.status === "sending";
+
+  const renderStatusIcon = () => {
+    if (!isOwn || isDeleted) return null;
+    if (isSending) return <span title="Sending..."><Clock className="h-3 w-3 animate-pulse opacity-80" /></span>;
+    if (isFailed) return <span title="Failed to send"><AlertCircle className="h-3.5 w-3.5 text-red-400" /></span>;
+    if (message.status === "delivered" || isRead) {
+      return <CheckCheck className={`h-3 w-3 ${isRead ? "text-sky-300" : "opacity-80"}`} />;
+    }
+    return <Check className="h-3 w-3 opacity-80" />;
+  };
 
   return (
     <div className={`group flex message-enter ${isOwn ? "justify-end" : "justify-start"} mb-1.5 px-1`}>
@@ -45,6 +59,8 @@ export function MessageBubble({
             className={`rounded-2xl px-3.5 py-2 text-[15px] leading-relaxed ${
               isDeleted
                 ? "italic text-base-400 dark:text-base-500 bg-base-100/60 dark:bg-base-800/40"
+                : isFailed
+                ? "bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-800 text-base-900 dark:text-base-50 rounded-br-md"
                 : isOwn
                 ? "bg-bubble-sent dark:bg-bubble-sent-dark text-white rounded-br-md"
                 : "bg-white/80 dark:bg-base-800/80 backdrop-blur text-base-900 dark:text-base-50 border border-base-200/60 dark:border-base-700/60 rounded-bl-md"
@@ -53,7 +69,7 @@ export function MessageBubble({
             {message.reply_to_id && !isDeleted && (
               <div
                 className={`text-xs mb-1 pl-2 border-l-2 opacity-80 ${
-                  isOwn ? "border-white/50" : "border-base-400"
+                  isOwn && !isFailed ? "border-white/50" : "border-base-400"
                 }`}
               >
                 Replying to a message
@@ -76,7 +92,7 @@ export function MessageBubble({
                       <a
                         href={att.file_url}
                         download={att.file_name}
-                        className={`flex items-center gap-2 underline text-sm ${isOwn ? "text-white" : "text-bubble-sent dark:text-bubble-sent-dark"}`}
+                        className={`flex items-center gap-2 underline text-sm ${isOwn && !isFailed ? "text-white" : "text-bubble-sent dark:text-bubble-sent-dark"}`}
                       >
                         📎 {att.file_name}
                       </a>
@@ -89,14 +105,30 @@ export function MessageBubble({
 
             <div
               className={`flex items-center gap-1 mt-0.5 text-[10px] ${
-                isOwn ? "text-white/70 justify-end" : "text-base-400 dark:text-base-500"
+                isFailed
+                  ? "text-red-500 justify-end"
+                  : isOwn
+                  ? "text-white/70 justify-end"
+                  : "text-base-400 dark:text-base-500"
               }`}
             >
               {message.is_edited && !isDeleted && <span>edited</span>}
               <span>{formatMessageTime(message.created_at)}</span>
-              {isOwn && !isDeleted && (isRead ? <CheckCheck className="h-3 w-3 text-sky-300" /> : <Check className="h-3 w-3" />)}
+              {renderStatusIcon()}
             </div>
           </div>
+
+          {isFailed && onRetry && (
+            <div className="flex items-center justify-end gap-1.5 mt-1 text-xs text-red-500 font-medium">
+              <span>Failed to send</span>
+              <button
+                onClick={() => onRetry(message)}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-900/60 text-red-700 dark:text-red-300 text-[11px] font-semibold transition"
+              >
+                <RotateCw className="h-3 w-3" /> Retry
+              </button>
+            </div>
+          )}
 
           {message.reactions.length > 0 && (
             <div className={`flex gap-0.5 mt-0.5 ${isOwn ? "justify-end" : "justify-start"}`}>

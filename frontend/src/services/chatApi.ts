@@ -27,15 +27,20 @@ export const chatApi = {
       .get(`/conversations/${conversationId}/messages`, { params: before ? { before } : {} })
       .then((r) => r.data as { items: MessageOut[]; has_more: boolean; next_cursor: string | null }),
 
-  sendMessage: (conversationId: string, content: string, replyToId?: string) =>
+  sendMessage: (conversationId: string, content: string, replyToId?: string, clientMessageId?: string) =>
     api
-      .post(`/conversations/${conversationId}/messages`, { content, reply_to_id: replyToId })
+      .post(`/conversations/${conversationId}/messages`, {
+        content,
+        reply_to_id: replyToId,
+        client_message_id: clientMessageId,
+      })
       .then((r) => r.data as MessageOut),
 
-  sendFile: (conversationId: string, file: File, content?: string) => {
+  sendFile: (conversationId: string, file: File, content?: string, clientMessageId?: string) => {
     const form = new FormData();
     form.append("file", file);
     if (content) form.append("content", content);
+    if (clientMessageId) form.append("client_message_id", clientMessageId);
     return api
       .post(`/conversations/${conversationId}/messages/with-attachment`, form, {
         headers: { "Content-Type": "multipart/form-data" },

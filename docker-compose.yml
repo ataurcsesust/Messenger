@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:16-alpine
@@ -9,9 +7,11 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: messenger_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - messenger_pg_data:/var/lib/postgresql/data
+    networks:
+      - messenger_net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -25,6 +25,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - messenger_net
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/messenger_db
       ASYNC_DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/messenger_db
@@ -36,6 +38,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - ./backend:/app
       - messenger_uploads:/app/uploads
 
   frontend:
@@ -46,8 +49,14 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
+    networks:
+      - messenger_net
     ports:
       - "5173:80"
+
+networks:
+  messenger_net:
+    driver: bridge
 
 volumes:
   messenger_pg_data:

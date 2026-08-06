@@ -33,6 +33,8 @@ class Message(Base):
         UUID(as_uuid=True), ForeignKey("messages.id", ondelete="SET NULL"), nullable=True
     )
 
+    client_message_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+
     is_edited: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_deleted_for_everyone: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_pinned: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

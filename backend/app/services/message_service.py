@@ -38,8 +38,19 @@ async def send_message(
     message_type: MessageType,
     reply_to_id: Optional[UUID],
     attachment_ids: List[UUID],
+    client_message_id: Optional[str] = None,
 ) -> Message:
     await conversation_service.require_membership(db, conversation_id, sender.id)
+
+    if client_message_id:
+        existing_result = await db.execute(
+            select(Message)
+            .where(Message.sender_id == sender.id, Message.client_message_id == client_message_id)
+            .options(*MESSAGE_LOAD_OPTIONS)
+        )
+        existing_msg = existing_result.scalar_one_or_none()
+        if existing_msg is not None:
+            return existing_msg
 
     if message_type == MessageType.TEXT and not content:
         raise ValidationAppError("Text messages require content")
@@ -70,6 +81,7 @@ async def send_message(
         message_type=message_type,
         content=content,
         reply_to_id=reply_to_id,
+        client_message_id=client_message_id,
     )
     db.add(message)
     await db.flush()
@@ -136,6 +148,7 @@ def _serialize_message(message: Message) -> dict:
         "message_type": message.message_type.value,
         "content": message.content if not message.is_deleted_for_everyone else None,
         "reply_to_id": str(message.reply_to_id) if message.reply_to_id else None,
+        "client_message_id": message.client_message_id,
         "is_edited": message.is_edited,
         "is_deleted_for_everyone": message.is_deleted_for_everyone,
         "is_pinned": message.is_pinned,

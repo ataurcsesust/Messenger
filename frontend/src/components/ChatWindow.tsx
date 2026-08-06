@@ -27,6 +27,7 @@ interface ChatWindowProps {
   onOpenGroupSettings: () => void;
   onStartCall: () => void;
   readByOthers: Set<string>;
+  onRetryMessage?: (message: MessageOut) => void;
 }
 
 export function ChatWindow({
@@ -49,6 +50,7 @@ export function ChatWindow({
   onOpenGroupSettings,
   onStartCall,
   readByOthers,
+  onRetryMessage,
 }: ChatWindowProps) {
   const { user } = useAuth();
   const [replyingTo, setReplyingTo] = useState<MessageOut | null>(null);
@@ -149,6 +151,7 @@ export function ChatWindow({
                   onReact={onReact}
                   onPin={onPin}
                   onForward={onForward}
+                  onRetry={onRetryMessage}
                 />
               </div>
             );

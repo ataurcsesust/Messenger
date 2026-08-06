@@ -14,9 +14,10 @@ interface SidebarProps {
   onOpenSettings: () => void;
   onOpenCallHistory: () => void;
   loading: boolean;
+  connectionStatus?: "connected" | "reconnecting" | "offline";
 }
 
-export function Sidebar({ conversations, activeId, onSelect, onNewChat, onOpenSettings, onOpenCallHistory, loading }: SidebarProps) {
+export function Sidebar({ conversations, activeId, onSelect, onNewChat, onOpenSettings, onOpenCallHistory, loading, connectionStatus = "connected" }: SidebarProps) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [search, setSearch] = useState("");
@@ -30,10 +31,24 @@ export function Sidebar({ conversations, activeId, onSelect, onNewChat, onOpenSe
   return (
     <aside className="w-full sm:w-80 shrink-0 h-full flex flex-col bg-white/60 dark:bg-base-900/60 backdrop-blur-xl border-r border-base-200/60 dark:border-base-700/60">
       <div className="flex items-center justify-between px-4 py-3.5 border-b border-base-200/60 dark:border-base-700/60">
-        <div className="relative">
+        <div className="relative flex items-center gap-2">
           <button onClick={() => setShowUserMenu((v) => !v)}>
             <Avatar name={user?.full_name ?? "?"} src={user?.avatar_url} isOnline showStatus={false} size="sm" />
           </button>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-base-100 dark:bg-base-800 border border-base-200 dark:border-base-700">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                connectionStatus === "connected"
+                  ? "bg-emerald-500"
+                  : connectionStatus === "reconnecting"
+                  ? "bg-amber-500 animate-ping"
+                  : "bg-red-500"
+              }`}
+            />
+            <span className="capitalize text-base-600 dark:text-base-300">
+              {connectionStatus}
+            </span>
+          </div>
           {showUserMenu && (
             <div
               className="absolute z-30 top-full mt-2 left-0 bg-white dark:bg-base-800 border border-base-200 dark:border-base-700 rounded-xl shadow-lg py-1 w-48 text-sm"

@@ -13,6 +13,7 @@ class SendMessageRequest(BaseModel):
     message_type: MessageType = MessageType.TEXT
     reply_to_id: Optional[UUID] = None
     attachment_ids: List[UUID] = Field(default_factory=list)  # pre-uploaded attachment IDs to link
+    client_message_id: Optional[str] = Field(default=None, max_length=64)
 
 
 class EditMessageRequest(BaseModel):
@@ -58,6 +59,7 @@ class MessageOut(BaseModel):
     message_type: MessageType
     content: Optional[str] = None
     reply_to_id: Optional[UUID] = None
+    client_message_id: Optional[str] = None
     is_edited: bool
     is_deleted_for_everyone: bool
     is_pinned: bool

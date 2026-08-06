@@ -43,6 +43,8 @@ export interface MessageOut {
   message_type: MessageType;
   content: string | null;
   reply_to_id: string | null;
+  client_message_id?: string;
+  status?: "sending" | "sent" | "delivered" | "failed";
   is_edited: boolean;
   is_deleted_for_everyone: boolean;
   is_pinned: boolean;

@@ -1,39 +1,56 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { WS_BASE_URL, tokenStorage } from "../services/api";
 import type { WsEvent } from "../types";
 
 type EventHandler = (event: WsEvent) => void;
+export type WsConnectionStatus = "connected" | "reconnecting" | "offline";
 
-/**
- * Maintains a single WebSocket connection for the whole app lifetime,
- * with automatic reconnect (exponential backoff, capped) whenever the
- * connection drops unexpectedly — network blip, server restart, laptop
- * sleep, etc.
- *
- * Important: `intentionalCloseRef` distinguishes a deliberate close (the
- * effect's cleanup — component unmount, or React StrictMode's dev-only
- * double-invoke of effects) from a real disconnect. Without this, a
- * StrictMode-triggered mount/cleanup/remount cycle in development causes
- * the "closed" socket's onclose handler to schedule a reconnect anyway,
- * which can leave two live sockets registered for the same user for a
- * short window — and since the backend relays events to every socket a
- * user has open, that duplicates every WebSocket event the client
- * receives (message events would just re-render harmlessly, but for
- * WebRTC call signaling a duplicated call_answer/call_offer crashes
- * RTCPeerConnection, since you can't apply the same SDP twice). This was
- * caught by an actual two-browser call test, not by inspection.
- */
 export function useWebSocket(onEvent: EventHandler) {
+  const [connectionStatus, setConnectionStatus] = useState<WsConnectionStatus>("reconnecting");
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttempt = useRef(0);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pongTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
   const intentionalCloseRef = useRef(false);
 
+  const startHeartbeat = useCallback(() => {
+    if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
+    if (pongTimeoutRef.current) clearTimeout(pongTimeoutRef.current);
+
+    pingIntervalRef.current = setInterval(() => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ type: "ping" }));
+        pongTimeoutRef.current = setTimeout(() => {
+          console.warn("WebSocket ping timed out, reconnecting...");
+          wsRef.current?.close();
+        }, 10000);
+      }
+    }, 20000);
+  }, []);
+
+  const stopHeartbeat = useCallback(() => {
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+    if (pongTimeoutRef.current) {
+      clearTimeout(pongTimeoutRef.current);
+      pongTimeoutRef.current = null;
+    }
+  }, []);
+
   const connect = useCallback(() => {
     const token = tokenStorage.getAccess();
     if (!token) return;
+
+    if (!navigator.onLine) {
+      setConnectionStatus("offline");
+    } else {
+      setConnectionStatus("reconnecting");
+    }
 
     intentionalCloseRef.current = false;
     const ws = new WebSocket(`${WS_BASE_URL}/ws?token=${encodeURIComponent(token)}`);
@@ -41,11 +58,20 @@ export function useWebSocket(onEvent: EventHandler) {
 
     ws.onopen = () => {
       reconnectAttempt.current = 0;
+      setConnectionStatus("connected");
+      startHeartbeat();
     };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data) as WsEvent;
+        if (data.type === "pong") {
+          if (pongTimeoutRef.current) {
+            clearTimeout(pongTimeoutRef.current);
+            pongTimeoutRef.current = null;
+          }
+          return;
+        }
         onEventRef.current(data);
       } catch {
         // ignore malformed frames
@@ -53,8 +79,16 @@ export function useWebSocket(onEvent: EventHandler) {
     };
 
     ws.onclose = () => {
+      stopHeartbeat();
       wsRef.current = null;
-      if (intentionalCloseRef.current) return; // deliberate close (unmount/StrictMode) — don't reconnect
+      if (intentionalCloseRef.current) return;
+
+      if (!navigator.onLine) {
+        setConnectionStatus("offline");
+      } else {
+        setConnectionStatus("reconnecting");
+      }
+
       const delay = Math.min(1000 * 2 ** reconnectAttempt.current, 15000);
       reconnectAttempt.current += 1;
       reconnectTimer.current = setTimeout(connect, delay);
@@ -63,16 +97,33 @@ export function useWebSocket(onEvent: EventHandler) {
     ws.onerror = () => {
       ws.close();
     };
-  }, []);
+  }, [startHeartbeat, stopHeartbeat]);
 
   useEffect(() => {
+    const handleOnline = () => {
+      if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+        reconnectAttempt.current = 0;
+        connect();
+      }
+    };
+    const handleOffline = () => {
+      setConnectionStatus("offline");
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
     connect();
+
     return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
       intentionalCloseRef.current = true;
+      stopHeartbeat();
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
       wsRef.current?.close();
     };
-  }, [connect]);
+  }, [connect, stopHeartbeat]);
 
   const send = useCallback((payload: Record<string, unknown>) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -89,5 +140,5 @@ export function useWebSocket(onEvent: EventHandler) {
     [send]
   );
 
-  return { sendTyping, sendStopTyping, send };
+  return { sendTyping, sendStopTyping, send, connectionStatus, reconnect: connect };
 }

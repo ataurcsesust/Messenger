@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { callApi } from "../services/chatApi";
+import { isNetworkError, isServerUnavailable, isTimeoutError } from "../services/api";
 import type { UserPublic, WsEvent } from "../types";
 
 export type CallPhase = "idle" | "outgoing-ringing" | "incoming-ringing" | "connecting" | "ongoing" | "ended";
@@ -135,12 +136,40 @@ export function useCall({ send }: UseCallOptions) {
     pendingCandidatesRef.current = [];
   }
 
+  async function callWithRetry<T>(fn: () => Promise<T>, maxRetries = 2): Promise<T> {
+    let attempt = 0;
+    while (true) {
+      try {
+        return await fn();
+      } catch (err) {
+        attempt++;
+        if (attempt > maxRetries || (!isServerUnavailable(err) && !isTimeoutError(err) && !isNetworkError(err))) {
+          throw err;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1500 * attempt));
+      }
+    }
+  }
+
+  function formatCallError(err: any): string {
+    if (isNetworkError(err)) {
+      return "Network disconnected. Please check your connection.";
+    }
+    if (isTimeoutError(err)) {
+      return "Request timed out while connecting. Server may be starting up.";
+    }
+    if (isServerUnavailable(err)) {
+      return "Server is currently waking up. Please try again in a few seconds.";
+    }
+    return err?.response?.data?.message || err?.message || "Couldn't complete the call.";
+  }
+
   const startCall = useCallback(
     async (target: UserPublic) => {
       setError(null);
       setEndedReason(null);
       try {
-        const call = await callApi.initiate(target.id);
+        const call = await callWithRetry(() => callApi.initiate(target.id));
         setCallId(call.id);
         callIdRef.current = call.id;
         setOtherUser(target);
@@ -159,7 +188,7 @@ export function useCall({ send }: UseCallOptions) {
         send({ type: "call_offer", target_user_id: target.id, call_id: call.id, sdp: offer });
       } catch (err: any) {
         setPhase("idle");
-        setError(err?.response?.data?.message || err?.message || "Couldn't start the call.");
+        setError(formatCallError(err));
         cleanup();
       }
     },
@@ -175,7 +204,7 @@ export function useCall({ send }: UseCallOptions) {
     try {
       const stream = await getMic();
       localStreamRef.current = stream;
-      await callApi.accept(activeCallId);
+      await callWithRetry(() => callApi.accept(activeCallId));
 
       const pc = createPeerConnection(targetId, activeCallId);
       stream.getTracks().forEach((t) => pc.addTrack(t, stream));
@@ -195,7 +224,7 @@ export function useCall({ send }: UseCallOptions) {
       setPhase("ongoing");
       startDurationTimer();
     } catch (err: any) {
-      setError(err?.message || "Couldn't join the call.");
+      setError(formatCallError(err));
       try {
         if (activeCallId) await callApi.reject(activeCallId);
       } catch {
