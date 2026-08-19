@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { MoreVertical, MessageCircleOff, Phone, ArrowLeft } from "lucide-react";
+import { MoreVertical, MessageCircleOff, Phone, ArrowLeft, Search, X, ChevronUp, ChevronDown } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { MessageBubble } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
 import type { ConversationListItem, MessageOut } from "../types";
 import { formatDateSeparator, formatLastSeen, isSameDay } from "../utils/date";
 import { useAuth } from "../context/AuthContext";
+import { chatApi } from "../services/chatApi";
 
 interface ChatWindowProps {
   conversation: ConversationListItem;
@@ -57,9 +58,64 @@ export function ChatWindow({
   const { user } = useAuth();
   const [replyingTo, setReplyingTo] = useState<MessageOut | null>(null);
   const [editingMessage, setEditingMessage] = useState<MessageOut | null>(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<MessageOut[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedSearchIdx, setSelectedSearchIdx] = useState(0);
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const prevMessageCount = useRef(0);
+
+  function jumpToMessage(msgId: string) {
+    setHighlightedMessageId(msgId);
+    const el = document.getElementById(`msg-${msgId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    setTimeout(() => {
+      setHighlightedMessageId((current) => (current === msgId ? null : current));
+    }, 3000);
+  }
+
+  async function handleSearch(q: string) {
+    setSearchQuery(q);
+    if (!q.trim()) {
+      setSearchResults([]);
+      setSelectedSearchIdx(0);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const results = await chatApi.searchMessages(conversation.id, q.trim());
+      setSearchResults(results);
+      setSelectedSearchIdx(0);
+      if (results.length > 0) {
+        jumpToMessage(results[0].id);
+      }
+    } catch (err) {
+      console.error("Search failed", err);
+    } finally {
+      setIsSearching(false);
+    }
+  }
+
+  function handlePrevResult() {
+    if (searchResults.length === 0) return;
+    const nextIdx = (selectedSearchIdx - 1 + searchResults.length) % searchResults.length;
+    setSelectedSearchIdx(nextIdx);
+    jumpToMessage(searchResults[nextIdx].id);
+  }
+
+  function handleNextResult() {
+    if (searchResults.length === 0) return;
+    const nextIdx = (selectedSearchIdx + 1) % searchResults.length;
+    setSelectedSearchIdx(nextIdx);
+    jumpToMessage(searchResults[nextIdx].id);
+  }
+
 
   useEffect(() => {
     // Auto-scroll to bottom on new messages, but not when loading older history.
@@ -109,6 +165,23 @@ export function ChatWindow({
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={() => {
+              setShowSearch(!showSearch);
+              if (showSearch) {
+                setSearchQuery("");
+                setSearchResults([]);
+              }
+            }}
+            className={`p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+              showSearch ? "bg-slate-200 dark:bg-slate-800 text-blue-600 dark:text-blue-400" : ""
+            }`}
+            title="Search messages"
+            aria-label="Search messages"
+          >
+            <Search className="h-5 w-5" />
+          </button>
+
           {!conversation.is_group && (
             <button
               onClick={onStartCall}
@@ -130,6 +203,64 @@ export function ChatWindow({
           </button>
         </div>
       </header>
+
+      {showSearch && (
+        <div className="px-4 py-2 bg-slate-100/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              autoFocus
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              placeholder="Search in conversation..."
+              className="w-full pl-9 pr-3 py-1.5 text-sm bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          {searchQuery.trim() && (
+            <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 shrink-0">
+              {isSearching ? (
+                <span>Searching...</span>
+              ) : (
+                <>
+                  <span>
+                    {searchResults.length > 0 ? `${selectedSearchIdx + 1} of ${searchResults.length}` : "No results"}
+                  </span>
+                  {searchResults.length > 0 && (
+                    <div className="flex items-center gap-0.5 ml-1">
+                      <button
+                        onClick={handlePrevResult}
+                        className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                        title="Previous result"
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={handleNextResult}
+                        className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                        title="Next result"
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+          <button
+            onClick={() => {
+              setShowSearch(false);
+              setSearchQuery("");
+              setSearchResults([]);
+            }}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+            title="Close search"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
         {loadingMessages && (
@@ -160,8 +291,10 @@ export function ChatWindow({
                   message={msg}
                   isOwn={msg.sender_id === user?.id}
                   isRead={readByOthers.has(msg.id)}
+                  isHighlighted={msg.id === highlightedMessageId}
                   onReply={setReplyingTo}
                   onEdit={setEditingMessage}
+
                   onDeleteForMe={onDeleteForMe}
                   onDeleteForEveryone={onDeleteForEveryone}
                   onReact={onReact}

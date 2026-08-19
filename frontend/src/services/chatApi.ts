@@ -81,4 +81,14 @@ export const chatApi = {
     form.append("file", file);
     return api.post("/users/me/avatar", form, { headers: { "Content-Type": "multipart/form-data" } }).then((r) => r.data);
   },
+
+  searchMessages: (conversationId: string, q: string) =>
+    api.get<MessageOut[]>(`/conversations/${conversationId}/messages/search`, { params: { q } }).then((r) => r.data),
+
+  uploadGroupAvatar: (conversationId: string, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return api.post(`/conversations/${conversationId}/avatar`, form, { headers: { "Content-Type": "multipart/form-data" } }).then((r) => r.data);
+  },
 };
+

@@ -192,6 +192,34 @@ async def get_messages(
     return messages, has_more
 
 
+async def search_messages(
+    db: AsyncSession, conversation_id: UUID, user_id: UUID, query_str: str, limit: int = 50
+) -> List[Message]:
+    await conversation_service.require_membership(db, conversation_id, user_id)
+
+    hidden_ids_result = await db.execute(
+        select(MessageDeletion.message_id).where(MessageDeletion.user_id == user_id)
+    )
+    hidden_ids = {row[0] for row in hidden_ids_result.all()}
+
+    stmt = (
+        select(Message)
+        .where(
+            Message.conversation_id == conversation_id,
+            Message.content.ilike(f"%{query_str}%"),
+            Message.is_deleted_for_everyone.is_(False),
+        )
+        .options(*MESSAGE_LOAD_OPTIONS)
+        .order_by(Message.created_at.desc())
+        .limit(limit)
+    )
+
+    result = await db.execute(stmt)
+    messages = [m for m in result.scalars().all() if m.id not in hidden_ids]
+    return messages
+
+
+
 async def edit_message(db: AsyncSession, message_id: UUID, user_id: UUID, new_content: str) -> Message:
     message = await _load_message(db, message_id)
     if message is None:

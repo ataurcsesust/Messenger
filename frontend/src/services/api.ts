@@ -111,8 +111,12 @@ api.interceptors.response.use(
       return api(originalRequest);
     } catch (refreshError) {
       resolveQueue(null);
-      tokenStorage.clear();
-      window.location.href = "/login";
+      if (axios.isAxiosError(refreshError) && (refreshError.response?.status === 401 || refreshError.response?.status === 403)) {
+        tokenStorage.clear();
+        if (window.location.pathname !== "/login" && window.location.pathname !== "/register") {
+          window.location.href = "/login";
+        }
+      }
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;

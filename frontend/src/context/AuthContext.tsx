@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import axios from "axios";
 import { api, tokenStorage } from "../services/api";
 import type { UserMe } from "../types";
 
@@ -24,11 +25,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      if (tokenStorage.getAccess()) {
+      const access = tokenStorage.getAccess();
+      const refresh = tokenStorage.getRefresh();
+
+      if (access || refresh) {
         try {
           await refreshMe();
-        } catch {
-          tokenStorage.clear();
+        } catch (err) {
+          // If refreshMe fails (e.g. access token expired), attempt token refresh before giving up
+          if (refresh) {
+            try {
+              const { data } = await api.post("/auth/refresh", { refresh_token: refresh });
+              tokenStorage.set(data.access_token, data.refresh_token);
+              await refreshMe();
+            } catch (refreshErr) {
+              if (axios.isAxiosError(refreshErr) && (refreshErr.response?.status === 401 || refreshErr.response?.status === 403)) {
+                tokenStorage.clear();
+              }
+            }
+          } else if (axios.isAxiosError(err) && (err.response?.status === 401 || err.response?.status === 403)) {
+            tokenStorage.clear();
+          }
         }
       }
       setIsLoading(false);

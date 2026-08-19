@@ -8,6 +8,7 @@ interface MessageBubbleProps {
   message: MessageOut;
   isOwn: boolean;
   isRead: boolean;
+  isHighlighted?: boolean;
   onReply: (message: MessageOut) => void;
   onEdit: (message: MessageOut) => void;
   onDeleteForMe: (id: string) => void;
@@ -22,6 +23,7 @@ export function MessageBubble({
   message,
   isOwn,
   isRead,
+  isHighlighted = false,
   onReply,
   onEdit,
   onDeleteForMe,
@@ -49,7 +51,13 @@ export function MessageBubble({
   };
 
   return (
-    <div className={`group flex message-enter ${isOwn ? "justify-end" : "justify-start"} mb-2 px-1`}>
+    <div
+      id={`msg-${message.id}`}
+      className={`group flex message-enter ${isOwn ? "justify-end" : "justify-start"} mb-2 px-1 transition-all duration-300 ${
+        isHighlighted ? "ring-2 ring-yellow-400 dark:ring-yellow-500 rounded-2xl bg-amber-500/10 p-1" : ""
+      }`}
+    >
+
       <div className={`flex items-end gap-1.5 max-w-[85%] sm:max-w-[75%] ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
         <div className="relative">
           {message.is_pinned && (

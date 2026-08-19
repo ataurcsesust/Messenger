@@ -121,6 +121,19 @@ async def list_messages(
     return MessagePage(items=messages, has_more=has_more, next_cursor=next_cursor)
 
 
+@router.get("/conversations/{conversation_id}/messages/search", response_model=List[MessageOut])
+async def search_messages(
+    conversation_id: UUID,
+    q: str = Query(..., min_length=1, description="Search term"),
+    limit: int = Query(default=50, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Search text messages in a conversation's history."""
+    return await message_service.search_messages(db, conversation_id, current_user.id, q, limit)
+
+
+
 @router.patch("/messages/{message_id}", response_model=MessageOut)
 async def edit_message(
     message_id: UUID,

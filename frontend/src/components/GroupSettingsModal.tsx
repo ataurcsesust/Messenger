@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { X, Crown, ShieldCheck, UserMinus, UserPlus, Search } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { X, Crown, ShieldCheck, UserMinus, UserPlus, Search, Camera } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { api } from "../services/api";
 import { chatApi } from "../services/chatApi";
@@ -34,6 +34,8 @@ export function GroupSettingsModal({
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<UserPublic[]>([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadMembers = useCallback(async () => {
     setLoading(true);
@@ -52,6 +54,21 @@ export function GroupSettingsModal({
   const myMembership = members.find((m) => m.user.id === currentUserId);
   const canManage = myMembership?.role === "admin" || myMembership?.role === "owner";
   const isOwner = myMembership?.role === "owner";
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      await chatApi.uploadGroupAvatar(conversationId, file);
+      onUpdated();
+    } catch (err) {
+      console.error("Failed to upload group photo:", err);
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
 
   async function handleSearch(q: string) {
     setQuery(q);
@@ -102,8 +119,29 @@ export function GroupSettingsModal({
         </div>
 
         <div className="p-4 sm:p-5 space-y-4 overflow-y-auto">
+          {canManage && (
+            <div className="flex items-center gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+              >
+                <Camera className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                {uploadingImage ? "Uploading photo..." : "Change Group Photo"}
+              </button>
+            </div>
+          )}
           <div>
             <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Group name</label>
+
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}

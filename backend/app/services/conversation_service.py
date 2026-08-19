@@ -246,6 +246,20 @@ async def update_group_info(db: AsyncSession, conversation_id: UUID, requester_i
     return conv
 
 
+async def update_group_avatar(db: AsyncSession, conversation_id: UUID, requester_id: UUID, group_image_url: str) -> Conversation:
+    membership = await require_membership(db, conversation_id, requester_id)
+    conv = await db.get(Conversation, conversation_id)
+    if conv is None or not conv.is_group:
+        raise NotFoundError("Group not found")
+    if membership.role not in (MemberRole.ADMIN, MemberRole.OWNER):
+        raise ForbiddenError("Only group admins can update group picture")
+    conv.group_image_url = group_image_url
+    await db.commit()
+    await db.refresh(conv)
+    return conv
+
+
+
 async def set_member_flag(db: AsyncSession, conversation_id: UUID, user_id: UUID, *, muted: Optional[bool] = None, archived: Optional[bool] = None, pinned: Optional[bool] = None) -> ConversationMember:
     membership = await require_membership(db, conversation_id, user_id)
     if muted is not None:

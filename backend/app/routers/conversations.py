@@ -1,11 +1,12 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import get_current_user
 from app.database.session import get_db
+from app.middleware.error_handlers import ValidationAppError
 from app.models.user import User
 from app.schemas.common import MessageResponse
 from app.schemas.conversation import (
@@ -18,7 +19,8 @@ from app.schemas.conversation import (
     UpdateGroupRequest,
     UpdateMemberRoleRequest,
 )
-from app.services import conversation_service
+from app.services import conversation_service, storage_service
+
 
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
@@ -72,6 +74,22 @@ async def update_group(
 ):
     """Update a group's name/description (admins only)."""
     return await conversation_service.update_group_info(db, conversation_id, current_user.id, payload.name, payload.description)
+
+
+@router.post("/{conversation_id}/avatar", response_model=ConversationOut)
+async def upload_group_avatar(
+    conversation_id: UUID,
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Upload/replace a group's avatar picture (admins only)."""
+    if file.content_type not in storage_service.ALLOWED_IMAGE_TYPES:
+        raise ValidationAppError("Only JPEG, PNG, WEBP, or GIF images are allowed")
+
+    public_url, _storage_path, _size, _mime = await storage_service.save_upload(file, category="avatars")
+    return await conversation_service.update_group_avatar(db, conversation_id, current_user.id, public_url)
+
 
 
 @router.post("/{conversation_id}/members", response_model=MessageResponse)
