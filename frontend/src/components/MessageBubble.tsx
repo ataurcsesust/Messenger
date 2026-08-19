@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { resolveMediaUrl } from "../utils/url";
+
+
 import { Check, CheckCheck, Clock, AlertCircle, RotateCw, MoreHorizontal, Pin, Reply, Smile, Copy, Pencil, Trash2, Forward } from "lucide-react";
 import type { MessageOut } from "../types";
 import { formatMessageTime } from "../utils/date";
@@ -90,27 +93,31 @@ export function MessageBubble({
               <span>This message was deleted</span>
             ) : (
               <>
-                {message.attachments.map((att) => (
-                  <div key={att.id} className="mb-1.5">
-                    {att.mime_type.startsWith("image/") ? (
-                      <img src={att.file_url} alt={att.file_name} className="rounded-xl max-w-full max-h-64 object-cover border border-black/10 dark:border-white/10" />
-                    ) : att.mime_type.startsWith("video/") ? (
-                      <video src={att.file_url} controls className="rounded-xl max-w-full max-h-64" />
-                    ) : att.mime_type.startsWith("audio/") ? (
-                      <audio src={att.file_url} controls className="max-w-full" />
-                    ) : (
-                      <a
-                        href={att.file_url}
-                        download={att.file_name}
-                        className={`flex items-center gap-2 underline text-sm font-medium ${
-                          isOwn && !isFailed ? "text-white" : "text-blue-600 dark:text-blue-400"
-                        }`}
-                      >
-                        📎 {att.file_name}
-                      </a>
-                    )}
-                  </div>
-                ))}
+                {message.attachments.map((att) => {
+                  const mediaUrl = resolveMediaUrl(att.file_url);
+                  return (
+                    <div key={att.id} className="mb-1.5">
+                      {att.mime_type.startsWith("image/") ? (
+                        <img src={mediaUrl} alt={att.file_name} className="rounded-xl max-w-full max-h-64 object-cover border border-black/10 dark:border-white/10" />
+                      ) : att.mime_type.startsWith("video/") ? (
+                        <video src={mediaUrl} controls className="rounded-xl max-w-full max-h-64" />
+                      ) : att.mime_type.startsWith("audio/") ? (
+                        <audio src={mediaUrl} controls className="max-w-full" />
+                      ) : (
+                        <a
+                          href={mediaUrl}
+                          download={att.file_name}
+                          className={`flex items-center gap-2 underline text-sm font-medium ${
+                            isOwn && !isFailed ? "text-white" : "text-blue-600 dark:text-blue-400"
+                          }`}
+                        >
+                          📎 {att.file_name}
+                        </a>
+                      )}
+                    </div>
+                  );
+                })}
+
                 {message.content && <span className="whitespace-pre-wrap break-words">{message.content}</span>}
               </>
             )}

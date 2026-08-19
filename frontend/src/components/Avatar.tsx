@@ -1,3 +1,5 @@
+import { resolveMediaUrl } from "../utils/url";
+
 interface AvatarProps {
   name: string;
   src?: string | null;
@@ -15,14 +17,16 @@ function initials(name: string): string {
 }
 
 export function Avatar({ name, src, size = "md", isOnline, showStatus = true }: AvatarProps) {
+  const resolvedSrc = resolveMediaUrl(src);
   return (
     <div className="relative shrink-0">
-      {src ? (
+      {resolvedSrc ? (
         <img
-          src={src}
+          src={resolvedSrc}
           alt={name}
           className={`${sizeMap[size]} rounded-full object-cover ring-2 ring-slate-200/80 dark:ring-slate-800 transition-colors duration-200`}
         />
+
       ) : (
         <div
           className={`${sizeMap[size]} rounded-full bg-gradient-to-br from-slate-500 to-slate-700 dark:from-slate-700 dark:to-slate-900 flex items-center justify-center font-bold text-white shadow-2xs ring-2 ring-slate-200/80 dark:ring-slate-800 transition-colors duration-200`}

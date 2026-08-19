@@ -60,6 +60,13 @@ def _subdir_for_mime(mime_type: str) -> str:
     return "documents"
 
 
+def _get_base_url() -> str:
+    base = (os.getenv("BASE_URL") or settings.BASE_URL).rstrip("/")
+    if base.startswith("http://") and "localhost" not in base and "127.0.0.1" not in base:
+        base = "https://" + base[7:]
+    return base
+
+
 async def save_upload(upload: UploadFile, category: str = "attachments") -> Tuple[str, str, int, str]:
     """
     Persist an UploadFile to local disk under UPLOAD_DIR/<category>/<subdir>/.
@@ -90,9 +97,11 @@ async def save_upload(upload: UploadFile, category: str = "attachments") -> Tupl
     with open(file_path, "wb") as f:
         f.write(contents)
 
-    public_url = f"{settings.BASE_URL}/uploads/{category}/{subdir}/{filename}"
+    base_url = _get_base_url()
+    public_url = f"{base_url}/uploads/{category}/{subdir}/{filename}"
     storage_path = str(file_path)
     return public_url, storage_path, size, mime_type
+
 
 
 def delete_file(storage_path: str) -> None:
