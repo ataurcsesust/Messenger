@@ -53,6 +53,9 @@ app = FastAPI(
 # ---------------------------------------------------------------------------
 # Middleware
 # ---------------------------------------------------------------------------
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
+
 cors_origins = settings.cors_origins_list
 
 if "*" in cors_origins:
@@ -73,9 +76,6 @@ else:
         allow_headers=["*"],
     )
 
-
-app.state.limiter = limiter
-app.add_middleware(SlowAPIMiddleware)
 
 
 @app.exception_handler(RateLimitExceeded)

@@ -55,25 +55,14 @@ async def _contacts_of(user_id: UUID):
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, token: str):
-    """
-    Real-time channel. Connect with `ws://host/ws?token=<access_token>`.
-
-    Server -> client events: new_message, message_edited, message_deleted,
-    message_reaction, message_pinned, messages_read, presence_update, typing,
-    incoming_call, call_accepted, call_rejected, call_ended, call_offer,
-    call_answer, call_ice_candidate (the last three are pure WebRTC relay).
-    Client -> server events: {"type": "typing", "conversation_id": "..."},
-    {"type": "stop_typing", "conversation_id": "..."}, and the WebRTC relay
-    triggers {"type": "call_offer"|"call_answer"|"call_ice_candidate",
-    "target_user_id": "...", ...sdp/candidate payload} — the server
-    forwards these verbatim to target_user_id without inspecting them.
-    """
+    await websocket.accept()
     user = await _authenticate(token)
     if user is None:
         await websocket.close(code=4001, reason="Unauthorized")
         return
 
     await manager.connect(user.id, websocket)
+
 
     # Mark online + notify contacts, but only the first connection for this user matters.
     async with AsyncSessionLocal() as db:

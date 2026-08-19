@@ -164,8 +164,9 @@ async def list_conversations(db: AsyncSession, user_id: UUID, include_archived: 
         )
 
     # Pinned first, then most recently active.
-    items.sort(key=lambda i: (not i["is_pinned"], -(i["last_message_at"] or datetime.min.replace(tzinfo=timezone.utc)).timestamp()))
+    items.sort(key=lambda i: (not i["is_pinned"], -(i["last_message_at"].timestamp() if i["last_message_at"] else 0)))
     return items
+
 
 
 async def get_member_user_ids(db: AsyncSession, conversation_id: UUID) -> List[UUID]:
