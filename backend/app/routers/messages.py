@@ -63,25 +63,27 @@ async def send_message_with_attachment(
 
     await conversation_service.require_membership(db, conversation_id, current_user.id)
 
-    allowed_map = {
-        **{t: MessageType.IMAGE for t in storage_service.ALLOWED_IMAGE_TYPES},
-        **{t: MessageType.VIDEO for t in storage_service.ALLOWED_VIDEO_TYPES},
-        **{t: MessageType.AUDIO for t in storage_service.ALLOWED_AUDIO_TYPES},
-        **{t: MessageType.DOCUMENT for t in storage_service.ALLOWED_DOCUMENT_TYPES},
-    }
-    if file.content_type not in allowed_map:
-        raise ValidationAppError("Unsupported file type")
+    norm_mime = storage_service.normalize_mime_type(file.content_type)
+    if norm_mime in storage_service.ALLOWED_IMAGE_TYPES:
+        msg_type = MessageType.IMAGE
+    elif norm_mime in storage_service.ALLOWED_VIDEO_TYPES:
+        msg_type = MessageType.VIDEO
+    elif norm_mime in storage_service.ALLOWED_AUDIO_TYPES:
+        msg_type = MessageType.AUDIO
+    else:
+        msg_type = MessageType.DOCUMENT
 
     public_url, storage_path, size, mime_type = await storage_service.save_upload(file, category="attachments")
 
     message = await message_service.send_message(
         db, conversation_id, current_user,
         content=content,
-        message_type=allowed_map[file.content_type],
+        message_type=msg_type,
         reply_to_id=None,
         attachment_ids=[],
         client_message_id=client_message_id,
     )
+
     attachment = Attachment(
         message_id=message.id,
         file_name=file.filename or "file",
@@ -92,8 +94,17 @@ async def send_message_with_attachment(
     )
     db.add(attachment)
     await db.commit()
-    await db.refresh(message)
-    return message
+
+    full_message = await message_service._load_message(db, message.id)
+    if full_message:
+        member_ids = await conversation_service.get_member_user_ids(db, conversation_id)
+        event = {
+            "type": "new_message",
+            "conversation_id": str(conversation_id),
+            "message": message_service._serialize_message(full_message),
+        }
+        await message_service.manager.send_to_users(member_ids, event)
+    return full_message or message
 
 
 @router.get("/conversations/{conversation_id}/messages", response_model=MessagePage)

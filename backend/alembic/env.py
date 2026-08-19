@@ -26,7 +26,9 @@ config = context.config
 # Inject the sync DB URL from our own settings instead of alembic.ini.
 db_url = settings.DATABASE_URL
 if db_url and "+asyncpg" in db_url:
-    db_url = db_url.replace("+asyncpg", "")
+    db_url = db_url.replace("+asyncpg", "+psycopg")
+elif db_url and db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
 
 config.set_main_option("sqlalchemy.url", db_url)
 

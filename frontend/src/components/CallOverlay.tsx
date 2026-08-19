@@ -76,7 +76,7 @@ export function CallOverlay({
       <div className="fixed inset-x-0 top-4 z-50 flex justify-center px-4">
         <div className="bg-red-50 dark:bg-red-950/80 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-xl px-4 py-2.5 text-sm shadow-xl flex items-center gap-3">
           {error}
-          <button onClick={onDismissError} className="font-semibold hover:underline shrink-0">
+          <button onClick={onDismissError} className="font-semibold hover:underline shrink-0 p-1 min-h-[44px] flex items-center justify-center">
             Dismiss
           </button>
         </div>
@@ -87,8 +87,8 @@ export function CallOverlay({
   if (!otherUser) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center px-4 transition-opacity duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-xs shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors duration-200">
+    <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center px-4 py-6 overflow-y-auto transition-opacity duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-xs shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto transition-colors duration-200">
         <div className="flex flex-col items-center pt-10 pb-6 px-6">
           <Avatar name={otherUser.full_name} src={otherUser.avatar_url} size="lg" showStatus={false} />
           <h2 className="mt-4 text-lg font-bold text-slate-900 dark:text-slate-100">{otherUser.full_name}</h2>

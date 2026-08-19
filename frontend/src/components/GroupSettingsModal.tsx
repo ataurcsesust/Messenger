@@ -94,21 +94,21 @@ export function GroupSettingsModal({
           <h2 className="font-semibold text-slate-900 dark:text-slate-100 text-base">Group settings</h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Close modal"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="p-5 space-y-4 overflow-y-auto">
+        <div className="p-4 sm:p-5 space-y-4 overflow-y-auto">
           <div>
             <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Group name</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={!canManage}
-              className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+              className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
           <div>
@@ -122,7 +122,7 @@ export function GroupSettingsModal({
             />
           </div>
           {canManage && (
-            <button onClick={saveInfo} className="text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline">
+            <button onClick={saveInfo} className="text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline min-h-[36px] flex items-center">
               Save name &amp; description
             </button>
           )}
@@ -135,7 +135,7 @@ export function GroupSettingsModal({
             </label>
             <div className="space-y-1 max-h-40 overflow-y-auto">
               {members.map((m) => (
-                <div key={m.user.id} className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <div key={m.user.id} className="flex items-center gap-2 p-2 min-h-[48px] rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                   <Avatar name={m.user.full_name} src={m.user.avatar_url} size="sm" isOnline={m.user.is_online} />
                   <div className="min-w-0 flex-1">
                     <div className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate flex items-center gap-1">
@@ -149,7 +149,7 @@ export function GroupSettingsModal({
                     <select
                       value={m.role}
                       onChange={(e) => setRole(m.user.id, e.target.value as "admin" | "owner" | "member")}
-                      className="text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 focus:outline-none"
+                      className="text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1.5 focus:outline-none min-h-[36px]"
                     >
                       <option value="member">Member</option>
                       <option value="admin">Admin</option>
@@ -157,8 +157,8 @@ export function GroupSettingsModal({
                     </select>
                   )}
                   {canManage && m.user.id !== currentUserId && (
-                    <button onClick={() => removeMember(m.user.id)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition" title="Remove member" aria-label="Remove member">
-                      <UserMinus className="h-3.5 w-3.5" />
+                    <button onClick={() => removeMember(m.user.id)} className="p-2 min-h-[36px] min-w-[36px] flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition" title="Remove member" aria-label="Remove member">
+                      <UserMinus className="h-4 w-4" />
                     </button>
                   )}
                 </div>

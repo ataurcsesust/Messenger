@@ -53,7 +53,7 @@ export function CallHistoryModal({ onClose, onCallBack }: CallHistoryModalProps)
           <h2 className="font-semibold text-slate-900 dark:text-slate-100 text-base">Call history</h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Close modal"
           >
             <X className="h-5 w-5" />
@@ -75,7 +75,7 @@ export function CallHistoryModal({ onClose, onCallBack }: CallHistoryModalProps)
               <button
                 key={item.id}
                 onClick={() => onCallBack(item.other_user)}
-                className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition duration-200"
+                className="w-full flex items-center gap-3 p-3 min-h-[56px] rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition duration-200"
               >
                 <Avatar name={item.other_user.full_name} src={item.other_user.avatar_url} size="sm" showStatus={false} />
                 <div className="flex-1 min-w-0">

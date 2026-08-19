@@ -57,22 +57,22 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
 
   return (
     <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center px-4 transition-opacity duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors duration-200">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden max-h-[90vh] flex flex-col transition-colors duration-200">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
           <h2 className="font-semibold text-slate-900 dark:text-slate-100 text-base">New conversation</h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Close modal"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="flex px-5 pt-4 gap-2">
+        <div className="flex px-4 sm:px-5 pt-4 gap-2 shrink-0">
           <button
             onClick={() => { setMode("direct"); setSelected([]); }}
-            className={`flex-1 py-2 rounded-xl text-xs font-semibold transition ${
+            className={`flex-1 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold flex items-center justify-center transition ${
               mode === "direct"
                 ? "bg-blue-600 text-white shadow-xs"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
@@ -82,7 +82,7 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
           </button>
           <button
             onClick={() => { setMode("group"); setSelected([]); }}
-            className={`flex-1 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition ${
+            className={`flex-1 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition ${
               mode === "group"
                 ? "bg-blue-600 text-white shadow-xs"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
@@ -92,13 +92,13 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
           </button>
         </div>
 
-        <div className="p-5 space-y-3">
+        <div className="p-4 sm:p-5 space-y-3 flex-1 overflow-y-auto">
           {mode === "group" && (
             <input
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="Group name"
-              className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           )}
 
@@ -108,7 +108,7 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
                 <span
                   key={u.id}
                   onClick={() => toggleSelect(u)}
-                  className="cursor-pointer text-xs font-medium bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-full px-2.5 py-1 flex items-center gap-1 hover:bg-red-50 hover:text-red-600 transition"
+                  className="cursor-pointer text-xs font-medium bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-full px-3 py-1.5 min-h-[32px] flex items-center gap-1 hover:bg-red-50 hover:text-red-600 transition"
                 >
                   {u.full_name} ×
                 </span>
@@ -123,7 +123,7 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search by name or username"
-              className="w-full rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 pl-10 pr-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800 transition duration-200"
+              className="w-full rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800 transition duration-200"
             />
           </div>
 
@@ -133,7 +133,7 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
               <button
                 key={user.id}
                 onClick={() => toggleSelect(user)}
-                className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition"
+                className="w-full flex items-center gap-3 p-2.5 min-h-[48px] rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition"
               >
                 <Avatar name={user.full_name} src={user.avatar_url} size="sm" isOnline={user.is_online} />
                 <div>
@@ -150,7 +150,7 @@ export function NewChatModal({ onClose, onCreated }: NewChatModalProps) {
           <button
             onClick={handleCreate}
             disabled={selected.length === 0 || loading || (mode === "group" && !groupName.trim())}
-            className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 shadow-xs disabled:opacity-50 transition"
+            className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-3 min-h-[44px] flex items-center justify-center shadow-xs disabled:opacity-50 transition"
           >
             {mode === "direct" ? "Start conversation" : "Create group"}
           </button>

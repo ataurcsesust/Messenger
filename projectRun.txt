@@ -1,8 +1,13 @@
-cd ~/MyFolder/Project/messenger-clone-fullstack-production/messenger-clone-project
+# Option 1: Docker (Recommended)
+cd ~/MyFolder/Project/Messenger
 docker compose up -d
 
+# Option 2: Local Development (Without Docker)
+# Terminal 1 - Backend:
+cd ~/MyFolder/Project/Messenger/backend
+source venv/bin/activate
+uvicorn app.main:app --reload --port 8000
 
-
-
-cd ~/MyFolder/Project/messenger-clone-fullstack-production/messenger-clone-project/frontend
+# Terminal 2 - Frontend:
+cd ~/MyFolder/Project/Messenger/frontend
 npm run dev

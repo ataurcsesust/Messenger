@@ -15,22 +15,47 @@ from fastapi import UploadFile
 from app.config import settings
 from app.middleware.error_handlers import ValidationAppError
 
-ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
-ALLOWED_VIDEO_TYPES = {"video/mp4", "video/webm", "video/quicktime"}
-ALLOWED_AUDIO_TYPES = {"audio/mpeg", "audio/wav", "audio/webm", "audio/ogg", "audio/mp4"}
+ALLOWED_IMAGE_TYPES = {
+    "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif",
+    "image/avif", "image/heic", "image/heif", "image/bmp", "image/tiff",
+    "image/svg+xml", "image/x-icon", "image/pjpeg",
+}
+ALLOWED_VIDEO_TYPES = {
+    "video/mp4", "video/webm", "video/quicktime", "video/x-msvideo",
+    "video/mpeg", "video/3gpp", "video/avi", "video/mkv", "video/ogg",
+}
+ALLOWED_AUDIO_TYPES = {
+    "audio/mpeg", "audio/wav", "audio/webm", "audio/ogg", "audio/mp4",
+    "audio/aac", "audio/flac", "audio/x-m4a", "audio/m4a", "audio/amr", "audio/3gpp",
+}
 ALLOWED_DOCUMENT_TYPES = {
     "application/pdf", "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.ms-excel", "text/plain", "application/zip",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "text/plain", "text/csv", "text/html", "application/zip", "application/x-zip-compressed",
+    "application/x-rar-compressed", "application/json", "application/octet-stream",
 }
 
 
+def normalize_mime_type(mime_type: Optional[str]) -> str:
+    if not mime_type:
+        return "application/octet-stream"
+    mime = mime_type.split(";")[0].strip().lower()
+    if mime in ("image/jpg", "image/pjpeg"):
+        return "image/jpeg"
+    return mime
+
+
 def _subdir_for_mime(mime_type: str) -> str:
-    if mime_type in ALLOWED_IMAGE_TYPES:
+    norm = normalize_mime_type(mime_type)
+    if norm in ALLOWED_IMAGE_TYPES:
         return "images"
-    if mime_type in ALLOWED_VIDEO_TYPES:
+    if norm in ALLOWED_VIDEO_TYPES:
         return "videos"
-    if mime_type in ALLOWED_AUDIO_TYPES:
+    if norm in ALLOWED_AUDIO_TYPES:
         return "audio"
     return "documents"
 

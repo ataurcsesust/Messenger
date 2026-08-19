@@ -15,9 +15,10 @@ interface SidebarProps {
   onOpenCallHistory: () => void;
   loading: boolean;
   connectionStatus?: "connected" | "reconnecting" | "offline";
+  className?: string;
 }
 
-export function Sidebar({ conversations, activeId, onSelect, onNewChat, onOpenSettings, onOpenCallHistory, loading, connectionStatus = "connected" }: SidebarProps) {
+export function Sidebar({ conversations, activeId, onSelect, onNewChat, onOpenSettings, onOpenCallHistory, loading, connectionStatus = "connected", className }: SidebarProps) {
   const { user, logout } = useAuth();
   const [search, setSearch] = useState("");
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -28,10 +29,10 @@ export function Sidebar({ conversations, activeId, onSelect, onNewChat, onOpenSe
   });
 
   return (
-    <aside className="w-full sm:w-80 shrink-0 h-full flex flex-col bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border-r border-slate-200/80 dark:border-slate-800/80 transition-colors duration-200">
+    <aside className={`w-full sm:w-80 shrink-0 h-full flex flex-col bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border-r border-slate-200/80 dark:border-slate-800/80 transition-colors duration-200 ${className ?? ""}`}>
       <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-200/80 dark:border-slate-800/80">
         <div className="relative flex items-center gap-2">
-          <button onClick={() => setShowUserMenu((v) => !v)} className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full">
+          <button onClick={() => setShowUserMenu((v) => !v)} className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full min-h-[44px] min-w-[44px] flex items-center justify-center p-1">
             <Avatar name={user?.full_name ?? "?"} src={user?.avatar_url} isOnline showStatus={false} size="sm" />
           </button>
           <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
@@ -49,27 +50,30 @@ export function Sidebar({ conversations, activeId, onSelect, onNewChat, onOpenSe
             </span>
           </div>
           {showUserMenu && (
-            <div
-              className="absolute z-30 top-full mt-2 left-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 w-48 text-sm transition-colors duration-200"
-              onMouseLeave={() => setShowUserMenu(false)}
-            >
-              <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700">
-                <p className="font-medium text-slate-900 dark:text-slate-100 truncate">{user?.full_name}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">@{user?.username}</p>
+            <>
+              <div className="fixed inset-0 z-20" onClick={() => setShowUserMenu(false)} />
+              <div
+                className="absolute z-30 top-full mt-2 left-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 w-52 text-sm transition-colors duration-200"
+                onMouseLeave={() => setShowUserMenu(false)}
+              >
+                <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700">
+                  <p className="font-medium text-slate-900 dark:text-slate-100 truncate">{user?.full_name}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">@{user?.username}</p>
+                </div>
+                <button
+                  onClick={() => { onOpenSettings(); setShowUserMenu(false); }}
+                  className="w-full flex items-center gap-2 px-3.5 py-2.5 min-h-[44px] hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 transition-colors"
+                >
+                  <Settings className="h-4 w-4 text-slate-500 dark:text-slate-400" /> Settings
+                </button>
+                <button
+                  onClick={logout}
+                  className="w-full flex items-center gap-2 px-3.5 py-2.5 min-h-[44px] hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" /> Log out
+                </button>
               </div>
-              <button
-                onClick={() => { onOpenSettings(); setShowUserMenu(false); }}
-                className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 transition-colors"
-              >
-                <Settings className="h-4 w-4 text-slate-500 dark:text-slate-400" /> Settings
-              </button>
-              <button
-                onClick={logout}
-                className="w-full flex items-center gap-2 px-3 py-2 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 transition-colors"
-              >
-                <LogOut className="h-4 w-4" /> Log out
-              </button>
-            </div>
+            </>
           )}
         </div>
 
@@ -77,7 +81,7 @@ export function Sidebar({ conversations, activeId, onSelect, onNewChat, onOpenSe
           <ThemeToggle variant="compact" />
           <button
             onClick={onOpenCallHistory}
-            className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            className="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 min-h-[44px] min-w-[44px] flex items-center justify-center"
             title="Call history"
             aria-label="Call history"
           >
@@ -85,7 +89,7 @@ export function Sidebar({ conversations, activeId, onSelect, onNewChat, onOpenSe
           </button>
           <button
             onClick={onNewChat}
-            className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            className="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 min-h-[44px] min-w-[44px] flex items-center justify-center"
             title="New conversation"
             aria-label="New conversation"
           >
@@ -102,7 +106,7 @@ export function Sidebar({ conversations, activeId, onSelect, onNewChat, onOpenSe
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search conversations"
-            className="w-full rounded-full bg-slate-100 dark:bg-slate-800/80 border border-transparent dark:border-slate-700/50 pl-10 pr-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800 transition duration-200"
+            className="w-full rounded-full bg-slate-100 dark:bg-slate-800/80 border border-transparent dark:border-slate-700/50 pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800 transition duration-200"
           />
         </div>
       </div>
@@ -134,7 +138,7 @@ export function Sidebar({ conversations, activeId, onSelect, onNewChat, onOpenSe
               <button
                 key={conv.id}
                 onClick={() => onSelect(conv.id)}
-                className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition duration-200 ${
+                className={`w-full flex items-center gap-3 p-3 min-h-[56px] rounded-xl text-left transition duration-200 ${
                   activeId === conv.id
                     ? "bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100 font-medium"
                     : "hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-900 dark:text-slate-100"

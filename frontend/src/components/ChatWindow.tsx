@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MoreVertical, MessageCircleOff, Phone } from "lucide-react";
+import { MoreVertical, MessageCircleOff, Phone, ArrowLeft } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { MessageBubble } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
@@ -28,6 +28,7 @@ interface ChatWindowProps {
   onStartCall: () => void;
   readByOthers: Set<string>;
   onRetryMessage?: (message: MessageOut) => void;
+  onBack?: () => void;
 }
 
 export function ChatWindow({
@@ -51,6 +52,7 @@ export function ChatWindow({
   onStartCall,
   readByOthers,
   onRetryMessage,
+  onBack,
 }: ChatWindowProps) {
   const { user } = useAuth();
   const [replyingTo, setReplyingTo] = useState<MessageOut | null>(null);
@@ -86,8 +88,18 @@ export function ChatWindow({
 
   return (
     <div className="flex-1 flex flex-col h-full min-w-0 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
-      <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl">
-        <div className="flex items-center gap-3 min-w-0">
+      <header className="sticky top-0 z-10 flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="sm:hidden p-2 -ml-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors flex items-center justify-center min-h-[44px] min-w-[44px] shrink-0"
+              title="Back to conversations"
+              aria-label="Back to conversations"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+          )}
           <Avatar name={name} src={avatarSrc} isOnline={isOnline} />
           <div className="min-w-0">
             <p className="font-semibold text-slate-900 dark:text-slate-100 truncate text-sm">{name}</p>
@@ -96,12 +108,12 @@ export function ChatWindow({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           {!conversation.is_group && (
             <button
               onClick={onStartCall}
               disabled={!isOnline}
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               title={isOnline ? "Start a voice call" : "User is offline"}
               aria-label="Start voice call"
             >
@@ -110,7 +122,7 @@ export function ChatWindow({
           )}
           <button
             onClick={conversation.is_group ? onOpenGroupSettings : undefined}
-            className={`p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors ${!conversation.is_group ? "opacity-40 cursor-default" : ""}`}
+            className={`p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${!conversation.is_group ? "opacity-40 cursor-default" : ""}`}
             title={conversation.is_group ? "Group settings" : undefined}
             aria-label="More actions"
           >

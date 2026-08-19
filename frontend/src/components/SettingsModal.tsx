@@ -74,24 +74,24 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
 
   return (
     <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center px-4 transition-opacity duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors duration-200">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden max-h-[90vh] flex flex-col transition-colors duration-200">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
           <h2 className="font-semibold text-slate-900 dark:text-slate-100 text-base">Settings</h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Close modal"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="flex px-5 pt-3 gap-1 border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
+        <div className="flex px-5 pt-3 gap-1 border-b border-slate-200 dark:border-slate-800 overflow-x-auto shrink-0">
           {(["profile", "appearance", "privacy", "password"] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => { setTab(t); setMessage(null); }}
-              className={`px-3.5 py-2.5 text-xs font-semibold capitalize border-b-2 transition-all -mb-px shrink-0 ${
+              className={`px-3.5 py-3 min-h-[44px] text-xs font-semibold capitalize border-b-2 transition-all -mb-px shrink-0 flex items-center justify-center ${
                 tab === t
                   ? "border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400"
                   : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
@@ -102,7 +102,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
           ))}
         </div>
 
-        <div className="p-5 space-y-4">
+        <div className="p-4 sm:p-5 space-y-4 flex-1 overflow-y-auto">
           {message && (
             <div className="text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 rounded-xl px-3.5 py-2">
               {message}
@@ -147,7 +147,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
               <button
                 onClick={saveProfile}
                 disabled={saving}
-                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 shadow-xs disabled:opacity-60 transition"
+                className="w-full sm:w-auto rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 min-h-[44px] flex items-center justify-center shadow-xs disabled:opacity-60 transition"
               >
                 Save profile
               </button>
@@ -168,18 +168,18 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
 
           {tab === "privacy" && (
             <>
-              <label className="flex items-center justify-between py-1 cursor-pointer">
+              <label className="flex items-center justify-between py-2 cursor-pointer min-h-[44px]">
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Show my last seen</span>
-                <input type="checkbox" checked={showLastSeen} onChange={(e) => setShowLastSeen(e.target.checked)} className="h-4 w-4 accent-blue-600 rounded" />
+                <input type="checkbox" checked={showLastSeen} onChange={(e) => setShowLastSeen(e.target.checked)} className="h-5 w-5 accent-blue-600 rounded" />
               </label>
-              <label className="flex items-center justify-between py-1 cursor-pointer">
+              <label className="flex items-center justify-between py-2 cursor-pointer min-h-[44px]">
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Show read receipts</span>
-                <input type="checkbox" checked={showReadReceipts} onChange={(e) => setShowReadReceipts(e.target.checked)} className="h-4 w-4 accent-blue-600 rounded" />
+                <input type="checkbox" checked={showReadReceipts} onChange={(e) => setShowReadReceipts(e.target.checked)} className="h-5 w-5 accent-blue-600 rounded" />
               </label>
               <button
                 onClick={savePrivacy}
                 disabled={saving}
-                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 shadow-xs disabled:opacity-60 transition mt-2"
+                className="w-full sm:w-auto rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 min-h-[44px] flex items-center justify-center shadow-xs disabled:opacity-60 transition mt-2"
               >
                 Save privacy settings
               </button>
@@ -209,7 +209,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
               <button
                 onClick={changePassword}
                 disabled={saving}
-                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 shadow-xs disabled:opacity-60 transition"
+                className="w-full sm:w-auto rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 min-h-[44px] flex items-center justify-center shadow-xs disabled:opacity-60 transition"
               >
                 Change password
               </button>

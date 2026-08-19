@@ -120,18 +120,18 @@ export function MessageInput({
   }
 
   return (
-    <div className="border-t border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl px-4 py-3 transition-colors duration-200">
+    <div className="border-t border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl px-3 sm:px-4 py-2.5 sm:py-3 transition-colors duration-200">
       {pendingFile && (
         <div className="mb-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 p-3 shadow-xs">
           <div className="flex items-start gap-3">
             {pendingFile.type.startsWith("image/") && pendingPreviewUrl ? (
-              <img src={pendingPreviewUrl} alt={pendingFile.name} className="h-16 w-16 rounded-lg object-cover border border-slate-200 dark:border-slate-700" />
+              <img src={pendingPreviewUrl} alt={pendingFile.name} className="h-16 w-16 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shrink-0" />
             ) : pendingFile.type.startsWith("video/") && pendingPreviewUrl ? (
-              <video src={pendingPreviewUrl} className="h-16 w-16 rounded-lg object-cover border border-slate-200 dark:border-slate-700" />
+              <video src={pendingPreviewUrl} className="h-16 w-16 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shrink-0" />
             ) : pendingFile.type.startsWith("audio/") && pendingPreviewUrl ? (
-              <audio src={pendingPreviewUrl} controls className="h-10 max-w-[180px]" />
+              <audio src={pendingPreviewUrl} controls className="h-10 w-full max-w-full sm:max-w-[200px]" />
             ) : (
-              <div className="h-16 w-16 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+              <div className="h-16 w-16 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0">
                 <FileText className="h-6 w-6 text-slate-500 dark:text-slate-400" />
               </div>
             )}
@@ -142,18 +142,18 @@ export function MessageInput({
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
                 placeholder="Add a caption (optional)"
-                className="mt-1.5 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-1 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="mt-1.5 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
-            <button onClick={cancelPendingFile} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shrink-0" aria-label="Cancel file">
-              <X className="h-4 w-4" />
+            <button onClick={cancelPendingFile} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shrink-0" aria-label="Cancel file">
+              <X className="h-5 w-5" />
             </button>
           </div>
           <button
             onClick={confirmSendFile}
-            className="mt-2.5 w-full rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-1.5 flex items-center justify-center gap-1.5 transition shadow-xs"
+            className="mt-2.5 w-full rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 min-h-[44px] flex items-center justify-center gap-1.5 transition shadow-xs"
           >
-            <Send className="h-3.5 w-3.5" /> Send attachment
+            <Send className="h-4 w-4" /> Send attachment
           </button>
         </div>
       )}
@@ -166,35 +166,35 @@ export function MessageInput({
               {editingMessage ? "Editing message" : `Replying to: ${replyingTo?.content ?? "attachment"}`}
             </span>
           </div>
-          <button onClick={editingMessage ? onCancelEdit : onCancelReply} className="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" aria-label="Cancel context">
-            <X className="h-3.5 w-3.5" />
+          <button onClick={editingMessage ? onCancelEdit : onCancelReply} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" aria-label="Cancel context">
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
 
-      <div className="flex items-end gap-2">
+      <div className="flex items-end gap-1.5 sm:gap-2">
         <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          className="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 min-h-[44px] min-w-[44px] flex items-center justify-center"
           title="Attach a file"
           aria-label="Attach a file"
         >
           <Paperclip className="h-5 w-5" />
         </button>
 
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-0">
           <textarea
             rows={1}
             value={text}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             placeholder="Type a message"
-            className="w-full resize-none rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-100/70 dark:bg-slate-800/80 px-4 py-2.5 pr-10 text-[15px] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800 max-h-32 transition-all"
+            className="w-full resize-none rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-100/70 dark:bg-slate-800/80 px-4 py-2.5 pr-11 text-[15px] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800 max-h-32 transition-all"
           />
           <button
             onClick={() => setShowEmoji((v) => !v)}
-            className="absolute right-3 bottom-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+            className="absolute right-2 bottom-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 min-h-[40px] min-w-[40px] flex items-center justify-center"
             title="Emoji picker"
             aria-label="Emoji picker"
           >
@@ -211,7 +211,7 @@ export function MessageInput({
         {text.trim() ? (
           <button
             onClick={handleSubmit}
-            className="p-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white shrink-0 shadow-xs hover:scale-105 active:scale-95 transition-all"
+            className="p-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white shrink-0 shadow-xs hover:scale-105 active:scale-95 transition-all min-h-[44px] min-w-[44px] flex items-center justify-center"
             title="Send message"
             aria-label="Send message"
           >
@@ -220,7 +220,7 @@ export function MessageInput({
         ) : (
           <button
             onClick={toggleRecording}
-            className={`p-2.5 rounded-full shrink-0 transition-all ${
+            className={`p-2.5 rounded-full shrink-0 transition-all min-h-[44px] min-w-[44px] flex items-center justify-center ${
               isRecording ? "bg-red-500 text-white animate-pulse" : "bg-blue-600 hover:bg-blue-700 text-white hover:scale-105 active:scale-95 shadow-xs"
             }`}
             title={isRecording ? "Stop recording" : "Record a voice message"}

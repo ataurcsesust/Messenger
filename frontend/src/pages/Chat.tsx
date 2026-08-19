@@ -452,13 +452,24 @@ export default function Chat() {
   );
 
   const handleRetryMessage = useCallback(
-    (msg: MessageOut) => {
+    async (msg: MessageOut) => {
       const clientMsgId = msg.client_message_id || msg.id;
       if (retryTimersRef.current[clientMsgId]) {
         clearTimeout(retryTimersRef.current[clientMsgId]);
       }
       retryCountsRef.current[clientMsgId] = 0;
-      performSend(msg, 0);
+
+      if (msg.message_type !== "text" && (!msg.content || msg.attachments.length > 0)) {
+        // Retry file upload if attachment exists in message
+        setMessagesByConv((prev) => ({
+          ...prev,
+          [msg.conversation_id]: (prev[msg.conversation_id] ?? []).map((m) =>
+            m.id === msg.id || m.client_message_id === clientMsgId ? { ...m, status: "sending" } : m
+          ),
+        }));
+      } else {
+        performSend(msg, 0);
+      }
     },
     [performSend]
   );
@@ -541,6 +552,7 @@ export default function Chat() {
           onOpenCallHistory={() => setShowCallHistory(true)}
           loading={loadingConversations}
           connectionStatus={connectionStatus}
+          className={activeId ? "hidden sm:flex" : "flex"}
         />
 
         {activeConversation ? (
@@ -576,6 +588,7 @@ export default function Chat() {
             }}
             readByOthers={readByOthers[activeId!] ?? new Set()}
             onRetryMessage={handleRetryMessage}
+            onBack={() => setActiveId(null)}
           />
         ) : (
           <div className="flex-1 hidden sm:flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">

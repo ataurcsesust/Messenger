@@ -6,6 +6,7 @@ truth so no other module reads `os.environ` directly. This makes settings
 testable, type-checked, and easy to override in different environments
 (dev / staging / production).
 """
+import os
 from functools import lru_cache
 from typing import List
 
@@ -41,6 +42,20 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = 60
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    @property
+    def effective_database_url(self) -> str:
+        url = os.getenv("DATABASE_URL") or self.DATABASE_URL
+        if os.path.exists("/.dockerenv"):
+            url = url.replace("localhost:5433", "db:5432").replace("127.0.0.1:5433", "db:5432")
+        return url
+
+    @property
+    def effective_async_database_url(self) -> str:
+        url = os.getenv("ASYNC_DATABASE_URL") or self.ASYNC_DATABASE_URL
+        if os.path.exists("/.dockerenv"):
+            url = url.replace("localhost:5433", "db:5432").replace("127.0.0.1:5433", "db:5432")
+        return url
 
     @property
     def cors_origins_list(self) -> List[str]:
